@@ -1,20 +1,20 @@
 import { useState } from "react";
 
 export default function AssignmentEditor() {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [points, setPoints] = useState(100);
-  const [group, setGroup] = useState("ASSIGNMENTS");
-  const [gradeDisplay, setGradeDisplay] = useState("Percentage");
-  const [submissionType, setSubmissionType] = useState("Online");
-  const [entryOptions, setEntryOptions] = useState([]);
-  const [assignTo, setAssignTo] = useState("Everyone");
-  const [dueDate, setDueDate] = useState();
-  const [availableFrom, setAvailableFrom] = useState();
-  const [availableUntil, setAvailableUntil] = useState();
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [points, setPoints] = useState<number>(100);
+  const [group, setGroup] = useState<string>("ASSIGNMENTS");
+  const [gradeDisplay, setGradeDisplay] = useState<string>("Percentage");
+  const [submissionType, setSubmissionType] = useState<string>("Online");
+  const [entryOptions, setEntryOptions] = useState<string[]>([]); 
+  const [assignTo, setAssignTo] = useState<string>("Everyone");
+  const [dueDate, setDueDate] = useState<string>("2024-05-13"); 
+  const [availableFrom, setAvailableFrom] = useState<string>("2024-05-06"); 
+  const [availableUntil, setAvailableUntil] = useState<string>("2024-05-20");
 
-  const handleCheckboxChange = (option) => {
-    setEntryOptions(prev =>
+  const handleCheckboxChange = (option: string) => {
+    setEntryOptions((prev: string[]) =>
       prev.includes(option)
         ? prev.filter(o => o !== option)
         : [...prev, option]
