@@ -1,6 +1,5 @@
 import ModulesControls from "./ModulesControls";
 import { ListGroup } from "react-bootstrap";
-import GreenCheckmark from "./GreenCheckmark"; 
 import LessonControlButtons from "./LessonControlButtons"
 import { BsGripVertical } from "react-icons/bs";
 
