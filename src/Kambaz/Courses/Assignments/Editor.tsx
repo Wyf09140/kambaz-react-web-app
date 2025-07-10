@@ -1,20 +1,21 @@
 import { useState } from "react";
+import { Form, Button, Row, Col } from "react-bootstrap";
 
 export default function AssignmentEditor() {
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [points, setPoints] = useState<number>(100);
-  const [group, setGroup] = useState<string>("ASSIGNMENTS");
-  const [gradeDisplay, setGradeDisplay] = useState<string>("Percentage");
-  const [submissionType, setSubmissionType] = useState<string>("Online");
-  const [entryOptions, setEntryOptions] = useState<string[]>([]); 
-  const [assignTo, setAssignTo] = useState<string>("Everyone");
-  const [dueDate, setDueDate] = useState<string>("2024-05-13"); 
-  const [availableFrom, setAvailableFrom] = useState<string>("2024-05-06"); 
-  const [availableUntil, setAvailableUntil] = useState<string>("2024-05-20");
+  const [name, setName] = useState("A1");
+  const [description, setDescription] = useState("The assignment is available online...");
+  const [points, setPoints] = useState(100);
+  const [group, setGroup] = useState("ASSIGNMENTS");
+  const [gradeDisplay, setGradeDisplay] = useState("Percentage");
+  const [submissionType, setSubmissionType] = useState("Online");
+  const [entryOptions, setEntryOptions] = useState(["Website URL"]);
+  const [assignTo, setAssignTo] = useState("Everyone");
+  const [dueDate, setDueDate] = useState("2024-05-13T23:59");
+  const [availableFrom, setAvailableFrom] = useState("2024-05-06T12:00");
+  const [availableUntil, setAvailableUntil] = useState("2024-05-20T12:00");
 
   const handleCheckboxChange = (option: string) => {
-    setEntryOptions((prev: string[]) =>
+    setEntryOptions(prev =>
       prev.includes(option)
         ? prev.filter(o => o !== option)
         : [...prev, option]
@@ -22,157 +23,146 @@ export default function AssignmentEditor() {
   };
 
   const handleSave = () => {
-    const result = {
-      name,
-      description,
-      points,
-      group,
-      gradeDisplay,
-      submissionType,
-      entryOptions,
-      assignTo,
-      dueDate,
-      availableFrom,
-      availableUntil
+    const data = {
+      name, description, points, group,
+      gradeDisplay, submissionType, entryOptions,
+      assignTo, dueDate, availableFrom, availableUntil,
     };
-    console.log("Assignment Saved:", result);
-    alert("Assignment saved! Check console for data.");
+    console.log("Assignment saved:", data);
+    alert("Saved! Check console for data.");
   };
 
   return (
-    <div id="wd-assignments-editor">
-      <label htmlFor="wd-name">Assignment Name</label><br />
-      <input id="wd-name" value={name} onChange={e => setName(e.target.value)} /><br /><br />
+    <div className="container mt-4" id="wd-assignment-editor">
+      <h3 className="mb-4 text-danger fw-bold">Assignment Editor</h3>
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Assignment Name</Form.Label>
+          <Form.Control
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+        </Form.Group>
 
-      <label htmlFor="wd-description">Description</label><br />
-      <textarea
-        id="wd-description"
-        rows={6}
-        cols={60}
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-      />
-      <br /><br />
+        <Form.Group className="mb-4">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={6}
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
+        </Form.Group>
 
-      <table>
-        <tbody>
-          <tr>
-            <td align="right"><label htmlFor="wd-points">Points</label></td>
-            <td>
-              <input
-                id="wd-points"
-                type="number"
-                value={points}
-                onChange={e => setPoints(Number(e.target.value))}
+        <Form.Group className="mb-4 row">
+          <Form.Label className="col-sm-2 fw-bold">Points</Form.Label>
+          <Col sm={10}>
+            <Form.Control
+              type="number"
+              value={points}
+              onChange={e => setPoints(Number(e.target.value))}
+            />
+          </Col>
+        </Form.Group>
+
+        <Form.Group className="mb-4 row">
+          <Form.Label className="col-sm-2 fw-bold">Assignment Group</Form.Label>
+          <Col sm={10}>
+            <Form.Select value={group} onChange={e => setGroup(e.target.value)}>
+              <option>ASSIGNMENTS</option>
+              <option>QUIZZES</option>
+              <option>EXAMS</option>
+            </Form.Select>
+          </Col>
+        </Form.Group>
+
+        <Form.Group className="mb-4 row">
+          <Form.Label className="col-sm-2 fw-bold">Display Grade as</Form.Label>
+          <Col sm={10}>
+            <Form.Select value={gradeDisplay} onChange={e => setGradeDisplay(e.target.value)}>
+              <option>Percentage</option>
+              <option>Points</option>
+            </Form.Select>
+          </Col>
+        </Form.Group>
+
+        <Form.Group className="mb-4 row">
+          <Form.Label className="col-sm-2 fw-bold">Submission Type</Form.Label>
+          <Col sm={10} className="border rounded p-3 bg-light">
+            <Form.Select
+              value={submissionType}
+              onChange={e => setSubmissionType(e.target.value)}
+              className="mb-2"
+            >
+              <option>Online</option>
+              <option>On Paper</option>
+              <option>No Submission</option>
+            </Form.Select>
+
+            <div className="fw-bold mb-2">Online Entry Options</div>
+            {["Text Entry", "Website URL", "Media Recordings", "Student Annotation", "File Uploads"].map(option => (
+              <Form.Check
+                key={option}
+                type="checkbox"
+                label={option}
+                checked={entryOptions.includes(option)}
+                onChange={() => handleCheckboxChange(option)}
               />
-            </td>
-          </tr>
+            ))}
+          </Col>
+        </Form.Group>
 
-          <tr>
-            <td align="right"><label htmlFor="wd-assignment-group">Assignment Group</label></td>
-            <td>
-              <select
-                id="wd-assignment-group"
-                value={group}
-                onChange={e => setGroup(e.target.value)}
-              >
-                <option>ASSIGNMENTS</option>
-                <option>QUIZZES</option>
-                <option>EXAMS</option>
-              </select>
-            </td>
-          </tr>
+        <Form.Group className="mb-4 row">
+          <Form.Label className="col-sm-2 fw-bold">Assign</Form.Label>
+          <Col sm={10} className="border rounded p-3 bg-light">
+            <Form.Label>Assign to</Form.Label>
+            <Form.Select
+              className="mb-3"
+              value={assignTo}
+              onChange={e => setAssignTo(e.target.value)}
+            >
+              <option>Everyone</option>
+              <option>Students Only</option>
+              <option>TA Only</option>
+            </Form.Select>
 
-          <tr>
-            <td align="right"><label htmlFor="wd-display-grade">Display Grade as</label></td>
-            <td>
-              <select
-                id="wd-display-grade"
-                value={gradeDisplay}
-                onChange={e => setGradeDisplay(e.target.value)}
-              >
-                <option>Percentage</option>
-                <option>Points</option>
-              </select>
-            </td>
-          </tr>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Label>Due</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={dueDate}
+                  onChange={e => setDueDate(e.target.value)}
+                />
+              </Col>
+            </Row>
+            <Row>
+              <Col md={6}>
+                <Form.Label>Available from</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={availableFrom}
+                  onChange={e => setAvailableFrom(e.target.value)}
+                />
+              </Col>
+              <Col md={6}>
+                <Form.Label>Until</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={availableUntil}
+                  onChange={e => setAvailableUntil(e.target.value)}
+                />
+              </Col>
+            </Row>
+          </Col>
+        </Form.Group>
 
-          <tr>
-            <td align="right" valign="top"><label htmlFor="wd-submission-type">Submission Type</label></td>
-            <td>
-              <select
-                id="wd-submission-type"
-                value={submissionType}
-                onChange={e => setSubmissionType(e.target.value)}
-              >
-                <option>Online</option>
-                <option>On Paper</option>
-                <option>No Submission</option>
-              </select>
-              <br />
-              {["Text Entry", "Website URL", "Media Recordings", "Student Annotation", "File Uploads"].map(option => (
-                <label key={option}>
-                  <input
-                    type="checkbox"
-                    checked={entryOptions.includes(option)}
-                    onChange={() => handleCheckboxChange(option)}
-                  />
-                  {option}
-                  <br />
-                </label>
-              ))}
-            </td>
-          </tr>
-
-         <tr>
-            <td align="right"><label htmlFor="wd-assign-to">Assign to</label></td>
-            <td>
-                <select
-                id="wd-assign-to"
-                value={assignTo}
-                onChange={e => setAssignTo(e.target.value)}
-                >
-                <option value="Everyone">Everyone</option>
-                <option value="Students Only">Students Only</option>
-                <option value="TA Only">TA Only</option>
-                </select>
-            </td>
-        </tr>
-
-          <tr>
-            <td align="right"><label htmlFor="wd-due-date">Due</label></td>
-            <td>
-              <input
-                id="wd-due-date"
-                type="date"
-                value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-              />
-            </td>
-          </tr>
-
-          <tr>
-            <td align="right"><label>Available from</label></td>
-            <td>
-              <input
-                type="date"
-                value={availableFrom}
-                onChange={e => setAvailableFrom(e.target.value)}
-              />
-              &nbsp;Until&nbsp;
-              <input
-                type="date"
-                value={availableUntil}
-                onChange={e => setAvailableUntil(e.target.value)}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <br />
-      <button onClick={() => alert("Cancelled")}>Cancel</button>
-      <button onClick={handleSave}>Save</button>
+        <div className="d-flex justify-content-end gap-3 mt-4">
+          <Button variant="secondary" onClick={() => alert("Cancelled")}>Cancel</Button>
+          <Button variant="danger" onClick={handleSave}>Save</Button>
+        </div>
+      </Form>
     </div>
   );
 }

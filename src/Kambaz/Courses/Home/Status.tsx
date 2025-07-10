@@ -1,19 +1,45 @@
+import { MdDoNotDisturbAlt } from "react-icons/md";
+import { FaCheckCircle } from "react-icons/fa";
+import { BiImport } from "react-icons/bi";
+import { LiaFileImportSolid } from "react-icons/lia";
+import { Button } from "react-bootstrap";
+{/* Find more icons */}
 export default function CourseStatus() {
-  return (
-    <div id="wd-course-status">
-      <h2>Course Status</h2>
-      <div>
-        <button>Unpublish</button> <button>Publish</button>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", marginTop: "10px" }}>
-        <button>Import Existing Content</button>
-        <button>Import from Commons</button>
-        <button>Choose Home Page</button>
-        <button>View Course Stream</button>
-        <button>New Announcement</button>
-        <button>New Analytics</button>
-        <button>View Course Notifications</button>
-      </div>
-    </div>
-  );
-}
+ return (
+   <div id="wd-course-status" style={{ width: "350px" }}>
+     <h2>Course Status</h2>
+     <div className="d-flex">
+       <div className="w-50 pe-1">
+         <Button variant="secondary" size="lg" className="w-100 text-nowrap ">
+           <MdDoNotDisturbAlt className="me-2 fs-5" /> Unpublish </Button> </div>
+       <div className="w-50">
+         <Button variant="success" size="lg" className="w-100">
+           <FaCheckCircle className="me-2 fs-5" /> Publish </Button> </div>
+     </div>
+     <br />
+     <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+       <BiImport className="me-2 fs-5" /> Import Existing Content </Button>
+     <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+       <LiaFileImportSolid className="me-2 fs-5" /> Import from Commons </Button>
+    <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <i className="me-2 fs-5 bi-house" /> Choose Home Page
+    </Button>
+
+    <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <i className="me-2 fs-5 bi-book" /> View Course Screen
+    </Button>
+
+    <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <i className="me-2 fs-5 bi-megaphone" /> New Announcement
+    </Button>
+
+    <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <i className="me-2 fs-5 bi-graph-up" /> New Analytics
+    </Button>
+
+    <Button variant="secondary" size="lg" className="w-100 mt-1 text-start">
+      <i className="me-2 fs-5 bi-bell" /> View Course Notifications
+    </Button>  
+     </div> 
+     );
+    }
