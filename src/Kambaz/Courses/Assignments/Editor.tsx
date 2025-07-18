@@ -1,166 +1,145 @@
-import { useState } from "react";
+import React from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
+import { Link, useParams } from "react-router-dom";
+import * as db from "../../Database"; // <--- 确保 Database 模块已正确设置 index.ts/js
 
 export default function AssignmentEditor() {
-  const [name, setName] = useState("A1");
-  const [description, setDescription] = useState("The assignment is available online...");
-  const [points, setPoints] = useState(100);
-  const [group, setGroup] = useState("ASSIGNMENTS");
-  const [gradeDisplay, setGradeDisplay] = useState("Percentage");
-  const [submissionType, setSubmissionType] = useState("Online");
-  const [entryOptions, setEntryOptions] = useState(["Website URL"]);
-  const [assignTo, setAssignTo] = useState("Everyone");
-  const [dueDate, setDueDate] = useState("2024-05-13T23:59");
-  const [availableFrom, setAvailableFrom] = useState("2024-05-06T12:00");
-  const [availableUntil, setAvailableUntil] = useState("2024-05-20T12:00");
+  const { courseId, assignmentId } = useParams(); // 获取路由参数中的 courseId 和 assignmentId
 
-  const handleCheckboxChange = (option: string) => {
-    setEntryOptions(prev =>
-      prev.includes(option)
-        ? prev.filter(o => o !== option)
-        : [...prev, option]
-    );
+  // 假设 assignments 数据也存在于 Database 模块中，或者您需要从别处获取
+  // 为了示例，我们先模拟一个空的 assignment 对象
+  const assignment = assignmentId ? db.assignments?.find((a: any) => a._id === assignmentId) : null;
+
+  // 如果 assignmentId 存在但未找到对应的 assignment，可以处理这种情况
+  // 这里简化处理，直接使用一个默认值
+  const currentAssignment = assignment || {
+    _id: "New Assignment",
+    title: "New Assignment",
+    description: "This is a new assignment.",
+    points: 100,
+    due_date: "2024-05-14T23:59:00", // 示例日期时间格式
+    available_from_date: "2024-05-06T00:00:00",
+    available_until_date: "2024-05-20T23:59:00",
+    course: courseId, // 将当前课程ID关联到新作业
   };
 
+  // 假设您还需要状态来管理表单输入
+  const [assignmentTitle, setAssignmentTitle] = React.useState(currentAssignment.title);
+  const [assignmentDescription, setAssignmentDescription] = React.useState(currentAssignment.description);
+  const [assignmentPoints, setAssignmentPoints] = React.useState(currentAssignment.points);
+  const [assignmentDueDate, setAssignmentDueDate] = React.useState(currentAssignment.due_date);
+  const [assignmentAvailableFromDate, setAssignmentAvailableFromDate] = React.useState(currentAssignment.available_from_date);
+  const [assignmentAvailableUntilDate, setAssignmentAvailableUntilDate] = React.useState(currentAssignment.available_until_date);
+
+
   const handleSave = () => {
-    const data = {
-      name, description, points, group,
-      gradeDisplay, submissionType, entryOptions,
-      assignTo, dueDate, availableFrom, availableUntil,
-    };
-    console.log("Assignment saved:", data);
-    alert("Saved! Check console for data.");
+    // 这里可以添加保存作业的逻辑，例如更新 db.assignments 或发送 API 请求
+    console.log("Saving Assignment:", {
+      ...currentAssignment,
+      title: assignmentTitle,
+      description: assignmentDescription,
+      points: assignmentPoints,
+      due_date: assignmentDueDate,
+      available_from_date: assignmentAvailableFromDate,
+      available_until_date: assignmentAvailableUntilDate,
+    });
+    // 保存后通常会导航回作业列表页面
+    // 例如：navigate(`/Kanbas/Courses/${courseId}/Assignments`);
+  };
+
+  const handleCancel = () => {
+    // 导航回作业列表页面
+    // 例如：navigate(`/Kanbas/Courses/${courseId}/Assignments`);
   };
 
   return (
-    <div className="container mt-4" id="wd-assignment-editor">
-      <h3 className="mb-4 text-danger fw-bold">Assignment Editor</h3>
+    <div className="container-fluid">
+      <h3>Assignment Editor</h3>
+      <hr />
+
       <Form>
-        <Form.Group className="mb-3">
-          <Form.Label>Assignment Name</Form.Label>
-          <Form.Control
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-4">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={6}
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-4 row">
-          <Form.Label className="col-sm-2 fw-bold">Points</Form.Label>
-          <Col sm={10}>
+        <Form.Group as={Row} className="mb-3" controlId="formAssignmentTitle">
+          <Form.Label column sm="2">Assignment Title</Form.Label>
+          <Col sm="10">
             <Form.Control
-              type="number"
-              value={points}
-              onChange={e => setPoints(Number(e.target.value))}
+              type="text"
+              value={assignmentTitle}
+              onChange={(e) => setAssignmentTitle(e.target.value)}
+              placeholder="Assignment Name"
             />
           </Col>
         </Form.Group>
 
-        <Form.Group className="mb-4 row">
-          <Form.Label className="col-sm-2 fw-bold">Assignment Group</Form.Label>
-          <Col sm={10}>
-            <Form.Select value={group} onChange={e => setGroup(e.target.value)}>
-              <option>ASSIGNMENTS</option>
-              <option>QUIZZES</option>
-              <option>EXAMS</option>
-            </Form.Select>
+        <Form.Group className="mb-3" controlId="formAssignmentDescription">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={assignmentDescription}
+            onChange={(e) => setAssignmentDescription(e.target.value)}
+            placeholder="Assignment Description"
+          />
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="formAssignmentPoints">
+          <Form.Label column sm="2">Points</Form.Label>
+          <Col sm="10">
+            <Form.Control
+              type="number"
+              value={assignmentPoints}
+              onChange={(e) => setAssignmentPoints(Number(e.target.value))}
+            />
           </Col>
         </Form.Group>
 
-        <Form.Group className="mb-4 row">
-          <Form.Label className="col-sm-2 fw-bold">Display Grade as</Form.Label>
-          <Col sm={10}>
-            <Form.Select value={gradeDisplay} onChange={e => setGradeDisplay(e.target.value)}>
-              <option>Percentage</option>
-              <option>Points</option>
-            </Form.Select>
-          </Col>
-        </Form.Group>
-
-        <Form.Group className="mb-4 row">
-          <Form.Label className="col-sm-2 fw-bold">Submission Type</Form.Label>
-          <Col sm={10} className="border rounded p-3 bg-light">
-            <Form.Select
-              value={submissionType}
-              onChange={e => setSubmissionType(e.target.value)}
-              className="mb-2"
-            >
-              <option>Online</option>
-              <option>On Paper</option>
-              <option>No Submission</option>
-            </Form.Select>
-
-            <div className="fw-bold mb-2">Online Entry Options</div>
-            {["Text Entry", "Website URL", "Media Recordings", "Student Annotation", "File Uploads"].map(option => (
-              <Form.Check
-                key={option}
-                type="checkbox"
-                label={option}
-                checked={entryOptions.includes(option)}
-                onChange={() => handleCheckboxChange(option)}
-              />
-            ))}
-          </Col>
-        </Form.Group>
-
-        <Form.Group className="mb-4 row">
-          <Form.Label className="col-sm-2 fw-bold">Assign</Form.Label>
-          <Col sm={10} className="border rounded p-3 bg-light">
-            <Form.Label>Assign to</Form.Label>
-            <Form.Select
-              className="mb-3"
-              value={assignTo}
-              onChange={e => setAssignTo(e.target.value)}
-            >
+        <Form.Group as={Row} className="mb-3" controlId="formAssignTo">
+          <Form.Label column sm="2">Assign to</Form.Label>
+          <Col sm="10">
+            {/* 这里通常是下拉选择框，列出学生或组 */}
+            <Form.Control as="select">
               <option>Everyone</option>
-              <option>Students Only</option>
-              <option>TA Only</option>
-            </Form.Select>
-
-            <Row className="mb-3">
-              <Col md={6}>
-                <Form.Label>Due</Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  value={dueDate}
-                  onChange={e => setDueDate(e.target.value)}
-                />
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <Form.Label>Available from</Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  value={availableFrom}
-                  onChange={e => setAvailableFrom(e.target.value)}
-                />
-              </Col>
-              <Col md={6}>
-                <Form.Label>Until</Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  value={availableUntil}
-                  onChange={e => setAvailableUntil(e.target.value)}
-                />
-              </Col>
-            </Row>
+              {/* 根据 db.users 或其他数据动态生成选项 */}
+            </Form.Control>
           </Col>
         </Form.Group>
 
-        <div className="d-flex justify-content-end gap-3 mt-4">
-          <Button variant="secondary" onClick={() => alert("Cancelled")}>Cancel</Button>
-          <Button variant="danger" onClick={handleSave}>Save</Button>
+        <Form.Group as={Row} className="mb-3" controlId="formDueDate">
+          <Form.Label column sm="2">Due</Form.Label>
+          <Col sm="10">
+            <Form.Control
+              type="datetime-local"
+              value={assignmentDueDate}
+              onChange={(e) => setAssignmentDueDate(e.target.value)}
+            />
+          </Col>
+        </Form.Group>
+
+        <Row className="mb-3">
+          <Form.Label column sm="2">Available from</Form.Label>
+          <Col sm="4">
+            <Form.Control
+              type="datetime-local"
+              value={assignmentAvailableFromDate}
+              onChange={(e) => setAssignmentAvailableFromDate(e.target.value)}
+            />
+          </Col>
+          <Form.Label column sm="2">Until</Form.Label>
+          <Col sm="4">
+            <Form.Control
+              type="datetime-local"
+              value={assignmentAvailableUntilDate}
+              onChange={(e) => setAssignmentAvailableUntilDate(e.target.value)}
+            />
+          </Col>
+        </Row>
+
+        <div className="d-flex justify-content-end">
+          <Button variant="light" className="me-2" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleSave}>
+            Save
+          </Button>
         </div>
       </Form>
     </div>
