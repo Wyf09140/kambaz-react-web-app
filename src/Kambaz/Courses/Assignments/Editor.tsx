@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams } from "react-router-dom";
 import * as db from "../../Database";
 import { FaUserCircle } from "react-icons/fa";
@@ -11,11 +10,12 @@ export default function PeopleTable() {
 
   const enrolledUsersWithSection = users
     .map((user: any) => {
-      const enrollment = enrollments.find(
-        (enrollment: any) =>
-          String(enrollment.user) === String(user._id) &&
-          String(enrollment.course) === String(cid)
-      );
+     const enrollment = enrollments.find(
+      (enrollment: any) =>
+        String(enrollment.user) === String(user._id) &&
+        String(enrollment.course) === String(cid)
+     ) as { section?: string };  // ✅ 添加类型断言
+
       if (enrollment) {
         return {
           ...user,
