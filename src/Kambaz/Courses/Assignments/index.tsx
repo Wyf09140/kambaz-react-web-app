@@ -1,4 +1,3 @@
-// src/Kambaz/Courses/Assignments/index.tsx
 
 import { Link, useParams } from "react-router-dom";
 import { ListGroup } from "react-bootstrap";
@@ -6,7 +5,7 @@ import { BsGripVertical } from "react-icons/bs";
 import { MdAssignment } from "react-icons/md";
 import AssignmentControlButtons from "./AssignmentControlButtons"; // 假设你有一个控制按钮组件
 import CourseNavigation from "../Navigation"; // 你的课程内部导航组件
-import { FaAlignJustify, FaPlusCircle, FaEllipsisV, FaCheckCircle } from "react-icons/fa";
+import { FaAlignJustify, FaPlusCircle, FaEllipsisV} from "react-icons/fa";
 
 import * as db from "../../Database"; // 导入数据库对象
 

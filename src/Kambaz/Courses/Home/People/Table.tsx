@@ -12,19 +12,16 @@ export default function PeopleTable() {
   const enrolledUsersWithSection = users
     .map((usr: any) => {
       const enrollmentForCurrentCourse = enrollments.find(
-      (e: any) =>
-    String(e.user) === String(usr._id) &&
-    String(e.course) === String(cid)
-    );
+        (e: any) =>
+          String(e.user) === String(usr._id) &&
+          String(e.course) === String(cid)
+      );
       if (enrollmentForCurrentCourse) {
-        return {
-          ...usr,
-          section: enrollmentForCurrentCourse.section,
-        };
+        return usr;  // ✅ user 已经有 section 字段
       }
       return null;
     })
-    .filter(Boolean);
+    .filter(Boolean);  // ✅ 过滤掉 null
 
   return (
     <div id="wd-people-table">
@@ -49,7 +46,7 @@ export default function PeopleTable() {
                 <span className="wd-last-name">{user.lastName}</span>
               </td>
               <td className="wd-login-id">{user.loginId}</td>
-              <td className="wd-section">{user.section}</td>
+              <td className="wd-section">{user.section || "N/A"}</td>
               <td className="wd-role">{user.role}</td>
               <td className="wd-last-activity">{user.lastActivity}</td>
               <td className="wd-total-activity">{user.totalActivity}</td>
