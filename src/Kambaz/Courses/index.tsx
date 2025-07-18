@@ -16,7 +16,7 @@ export default function Courses() {
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        {course?._id} - {course.name}  &gt; {pathname.split("/")[4]}
+        {course?._id} - {course?.name}  &gt; {pathname.split("/")[4]}
           </h2>
       <hr />
 

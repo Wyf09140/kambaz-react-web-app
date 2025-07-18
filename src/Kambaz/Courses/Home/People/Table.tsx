@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams } from "react-router-dom";
 import * as db from "../../../Database";
 import { FaUserCircle } from "react-icons/fa";
@@ -12,10 +11,11 @@ export default function PeopleTable() {
 
   const enrolledUsersWithSection = users
     .map((usr: any) => {
-      const enrollmentForCurrentCourse = enrollments.find((enroll: any) =>
-        String(enroll.user) === String(usr._id) &&
-        String(enroll.course) === String(cid)
-      );
+      const enrollmentForCurrentCourse = enrollments.find(
+      (e: any) =>
+    String(e.user) === String(usr._id) &&
+    String(e.course) === String(cid)
+    );
       if (enrollmentForCurrentCourse) {
         return {
           ...usr,
