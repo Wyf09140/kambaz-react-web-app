@@ -1,10 +1,11 @@
 import React from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import * as db from "../../Database";
 
 export default function AssignmentEditor() {
-  const { courseId, assignmentId } = useParams();
+  const { cid: courseId, aid: assignmentId } = useParams();
+  const navigate = useNavigate();
 
   const assignment = assignmentId
     ? db.assignments?.find((a: any) => a._id === assignmentId)
@@ -38,10 +39,11 @@ export default function AssignmentEditor() {
       availableFromDate: assignmentAvailableFromDate,
       untilDate: assignmentAvailableUntilDate,
     });
+    navigate(`/Kanbas/Courses/${courseId}/Assignments`);
   };
 
   const handleCancel = () => {
-    // navigate back if needed
+    navigate(`/Kanbas/Courses/${courseId}/Assignments`);
   };
 
   return (
@@ -124,12 +126,8 @@ export default function AssignmentEditor() {
         </Row>
 
         <div className="d-flex justify-content-end">
-          <Button variant="light" className="me-2" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleSave}>
-            Save
-          </Button>
+          <Button variant="light" className="me-2" onClick={handleCancel}>Cancel</Button>
+          <Button variant="danger" onClick={handleSave}>Save</Button>
         </div>
       </Form>
     </div>
