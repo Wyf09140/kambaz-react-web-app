@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function ObjectStateVariable() {
   const [person, setPerson] = useState({ name: "Peter", age: 24 });
