@@ -1,55 +1,114 @@
+import React, { useState } from "react";
 import { useParams } from "react-router";
-import * as db from "../../Database";
-import { ListGroup } from "react-bootstrap";
+import { ListGroup, FormControl } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
 import LessonControlButtons from "./LessonControlButtons";
 import ModulesControls from "./ModulesControls";
-import GreenCheckmark from "./GreenCheckmark";
-import { BsThreeDotsVertical } from "react-icons/bs"
+import ModuleControlButtons from "./ModuleControlButtons";
+import {
+  addModule,
+  editModule,
+  updateModule,
+  deleteModule,
+} from "./reducer";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function Modules() {
-  const { cid } = useParams(); // 从 URL 获取课程 ID
-  const modules = db.modules;
+  const { cid } = useParams();
+  const [moduleName, setModuleName] = useState("");
+  const modules = useSelector((state: any) => state.modulesReducer.modules);
+  const currentUser = useSelector((state: any) => state.accountReducer.currentUser);
+  const isFaculty = currentUser?.role === "FACULTY";
+  const dispatch = useDispatch();
+
+  const handleAddModule = () => {
+    if (!moduleName.trim()) return;
+    dispatch(addModule({ name: moduleName, course: cid }));
+    setModuleName("");
+  };
+
+  const handleDeleteModule = (moduleId: string) => {
+    dispatch(deleteModule(moduleId));
+  };
+
+  const handleEditModule = (moduleId: string) => {
+    dispatch(editModule(moduleId));
+  };
+
+  const handleUpdateModule = (module: any) => {
+    dispatch(updateModule(module));
+  };
 
   return (
-    <ListGroup id="wd-modules" className="rounded-0">
-      <ModulesControls /><br />
+    <div className="wd-modules">
+      {/* ✅ 只有 FACULTY 可见 */}
+      {isFaculty && (
+        <ModulesControls
+          moduleName={moduleName}
+          setModuleName={setModuleName}
+          addModule={handleAddModule}
+        />
+      )}
 
-      {modules
-        .filter((module: any) => module.course === cid)
-        .map((module: any) => (
-          <ListGroup.Item
-            key={module._id}
-            className="wd-module p-0 mb-5 fs-5 border-gray"
-          >
-            {/* 只保留一个 wd-title div */}
-            <div className="wd-title p-3 ps-2 bg-secondary d-flex justify-content-between align-items-center">
-              <div>
-                <BsGripVertical className="me-2 fs-3" /> {module.name}{" "}
-              </div>
-              {/* 这个 div 包含了右侧的所有图标和加号 */}
-              <div className="d-flex align-items-center">
-                <GreenCheckmark />
-                <span className="ms-2">+</span> {/* ms-2 为 + 号提供左边距 */}
-                <BsThreeDotsVertical className="ms-2 fs-4" /> {/* 添加竖着的三个点图标，并提供左边距和大小 */}
-              </div>
-            </div>
+      <ListGroup id="wd-modules" className="rounded-0">
+        {Array.isArray(modules) &&
+          modules
+            .filter((module: any) => module.course === cid)
+            .map((module: any) => (
+              <ListGroup.Item
+                key={module._id}
+                className="wd-module p-0 mb-5 fs-5 border-gray"
+              >
+                <div className="wd-title p-3 ps-2 bg-secondary d-flex justify-content-between align-items-center">
+                  <div>
+                    <BsGripVertical className="me-2 fs-3" />{" "}
+                    {!module.editing && module.name}
+                    {module.editing && (
+                      <FormControl
+                        className="w-50 d-inline-block"
+                        defaultValue={module.name}
+                        onChange={(e) =>
+                          handleUpdateModule({
+                            ...module,
+                            name: e.target.value,
+                          })
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleUpdateModule({
+                              ...module,
+                              editing: false,
+                            });
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
 
-            {module.lessons && (
-              <ListGroup className="wd-lessons rounded-0">
-                {module.lessons.map((lesson: any, index: number) => (
-                  <ListGroup.Item
-                    key={index}
-                    className="wd-lesson p-3 ps-1"
-                  >
-                    <BsGripVertical className="me-2 fs-3" /> {lesson.name}{" "}
-                    <LessonControlButtons />
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            )}
-          </ListGroup.Item>
-        ))}
-    </ListGroup>
+                  {/* ✅ 只有 FACULTY 可见按钮 */}
+                  {isFaculty && (
+                    <ModuleControlButtons
+                      moduleId={module._id}
+                      deleteModule={() => handleDeleteModule(module._id)}
+                      editModule={() => handleEditModule(module._id)}
+                    />
+                  )}
+                </div>
+
+                {module.lessons && (
+                  <ListGroup className="wd-lessons rounded-0">
+                    {module.lessons.map((lesson: any, index: number) => (
+                      <ListGroup.Item key={index} className="wd-lesson p-3 ps-1">
+                        <BsGripVertical className="me-2 fs-3" /> {lesson.name}{" "}
+                        {/* ✅ 只有 FACULTY 可见按钮 */}
+                        {isFaculty && <LessonControlButtons />}
+                      </ListGroup.Item>
+                    ))}
+                  </ListGroup>
+                )}
+              </ListGroup.Item>
+            ))}
+      </ListGroup>
+    </div>
   );
 }
