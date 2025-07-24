@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { Card, Button, Row, Col, FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  enrollCourse,
-  unenrollCourse,
-} from "./Account/reducer"; // ✅ 路径修正
+import { enrollCourse, unenrollCourse } from "./Account/reducer";
 
 export default function Dashboard({
   courses,
@@ -25,8 +22,6 @@ export default function Dashboard({
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const [showAllCourses, setShowAllCourses] = useState(false);
-
-  // ✅ 用本地状态判断学生是否选了该课程
   const enrolledCourseIds = currentUser?.enrolledCourseIds || [];
 
   const filteredCourses = courses.filter((course) => {
@@ -39,7 +34,6 @@ export default function Dashboard({
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1>
 
-      {/* ✅ 学生显示 Enrollments 按钮 */}
       {currentUser?.role === "STUDENT" && (
         <Button
           className="float-end mb-3"
@@ -52,7 +46,6 @@ export default function Dashboard({
 
       <hr />
 
-      {/* ✅ 教师专属创建和编辑课程区块 */}
       {currentUser?.role === "FACULTY" && (
         <>
           <h5>
@@ -105,11 +98,11 @@ export default function Dashboard({
               className="wd-dashboard-course"
               style={{ width: "300px" }}
             >
-              <Card>
-                <Link
-                  to={`/Kambaz/Courses/${course._id}/Home`}
-                  className="wd-dashboard-course-link text-decoration-none text-dark"
-                >
+              <Link
+                to={`/Kambaz/Courses/${course._id}/Home`}
+                className="wd-dashboard-course-link text-decoration-none text-dark"
+              >
+                <Card>
                   <Card.Img
                     src={course.image}
                     variant="top"
@@ -127,13 +120,11 @@ export default function Dashboard({
                       {course.description}
                     </Card.Text>
 
-                    {/* ✅ 教师操作按钮 */}
                     {currentUser?.role === "FACULTY" && (
                       <>
                         <Button
                           variant="primary"
-                          as={Link}
-                          to={`/Kambaz/Courses/${course._id}/Home`}
+                          onClick={(e) => e.preventDefault()}
                         >
                           Go
                         </Button>
@@ -158,13 +149,11 @@ export default function Dashboard({
                       </>
                     )}
 
-                    {/* ✅ 学生操作按钮 */}
                     {currentUser?.role === "STUDENT" && (
                       <>
                         <Button
                           variant="primary"
-                          as={Link}
-                          to={`/Kambaz/Courses/${course._id}/Home`}
+                          onClick={(e) => e.preventDefault()}
                         >
                           Go
                         </Button>
@@ -194,8 +183,8 @@ export default function Dashboard({
                       </>
                     )}
                   </Card.Body>
-                </Link>
-              </Card>
+                </Card>
+              </Link>
             </Col>
           ))}
         </Row>
@@ -203,4 +192,3 @@ export default function Dashboard({
     </div>
   );
 }
-s
