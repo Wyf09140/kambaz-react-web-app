@@ -122,12 +122,7 @@ export default function Dashboard({
 
                     {currentUser?.role === "FACULTY" && (
                       <>
-                        <Button
-                          variant="primary"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          Go
-                        </Button>
+                        <Button variant="primary">Go</Button>
                         <Button
                           onClick={(event) => {
                             event.preventDefault();
@@ -151,12 +146,7 @@ export default function Dashboard({
 
                     {currentUser?.role === "STUDENT" && (
                       <>
-                        <Button
-                          variant="primary"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          Go
-                        </Button>
+                        <Button variant="primary">Go</Button>
                         {enrolledCourseIds.includes(course._id) ? (
                           <Button
                             variant="danger"
