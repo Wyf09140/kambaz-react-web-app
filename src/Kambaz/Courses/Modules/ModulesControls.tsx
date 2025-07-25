@@ -4,11 +4,6 @@ import GreenCheckmark from "./GreenCheckmark";
 import { Button, Dropdown } from "react-bootstrap";
 import ModuleEditor from "./ModuleEditor";
 
-type Props = {
-  moduleName: string;
-  setModuleName: (title: string) => void;
-  addModule: () => void;
-};
 
 export default function ModulesControls(
   { moduleName, setModuleName, addModule }:

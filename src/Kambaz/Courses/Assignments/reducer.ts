@@ -12,13 +12,13 @@ const assignmentsSlice = createSlice({
       state.push(action.payload);
     },
     updateAssignment: (state, action) => {
-      const index = state.findIndex(a => a._id === action.payload._id);
+      const index = state.findIndex((a: any) => a._id === action.payload._id);
       if (index !== -1) {
         state[index] = { ...state[index], ...action.payload };
       }
     },
     deleteAssignment: (state, action) => {
-      const index = state.findIndex(a => a._id === action.payload);
+      const index = state.findIndex((a: any) => a._id === action.payload);
       if (index !== -1) {
         state.splice(index, 1);
       }
