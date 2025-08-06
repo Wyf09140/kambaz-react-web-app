@@ -24,7 +24,6 @@ export default function Modules() {
   const currentUser = useSelector((state: any) => state.accountReducer.currentUser);
   const isFaculty = currentUser?.role === "FACULTY";
 
-  // 每个模块独立的输入状态
   const [editNames, setEditNames] = useState<{ [key: string]: string }>({});
 
   const fetchModules = async () => {
@@ -57,7 +56,16 @@ export default function Modules() {
 
   const handleChange = (moduleId: string, value: string) => {
     setEditNames((prev) => ({ ...prev, [moduleId]: value }));
-    dispatch(updateModule({ _id: moduleId, name: value }));
+
+    const oldModule = modules.find((m: any) => m._id === moduleId);
+    if (!oldModule) return;
+
+    const updatedModule = {
+      ...oldModule,
+      name: value,
+    };
+
+    dispatch(updateModule(updatedModule));
   };
 
   const handleSave = async (module: any) => {
