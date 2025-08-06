@@ -14,7 +14,11 @@ const app = express();
 // ✅ CORS 必须允许凭证，并且 origin 必须与前端一致
 app.use(cors({
   credentials: true,
-  origin: process.env.NETLIFY_URL || "http://localhost:5173",
+  origin: [
+    "https://a4--cosmic-pithivier-a2929c.netlify.app",
+    "https://a5--cosmic-pithivier-a2929c.netlify.app",
+    "http://localhost:5173"
+  ]
 }));
 
 // ✅ 解析 JSON —— 放在路由之前
