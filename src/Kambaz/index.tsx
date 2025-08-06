@@ -11,6 +11,8 @@ import ProtectedRoute from "./Account/ProtectedRoute";
 import Session from "./Account/Session";
 import "./styles.css";
 import { v4 as uuidv4 } from "uuid";
+import * as userClient from "./Account/client";
+
 
 // ✅ 新增：课程客户端（示例）
 import axios from "axios";
