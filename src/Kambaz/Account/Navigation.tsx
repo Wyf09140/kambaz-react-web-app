@@ -8,8 +8,8 @@ export default function AccountNavigation() {
   const links = currentUser
     ? [{ label: "Profile", path: "/profile" }]
     : [
-        { label: "Signin", path: "/signin" },
-        { label: "Signup", path: "/signup" }
+        { label: "Signin", path: "/Kambaz/Account/Signin" },
+        { label: "Signup", path: "/Kambaz/Account/Signup" }
       ];
 
   return (

@@ -14,7 +14,7 @@ export default function Assignments() {
 
   const assignments = useSelector((state: any) => state.assignmentsReducer);
   const courseAssignments = assignments.filter((a: any) => a.course === cid);
-
+  
   return (
     <div className="d-flex">
       <div className="flex-grow-1 p-3">

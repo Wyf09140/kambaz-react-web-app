@@ -3,40 +3,44 @@ import { Button, FormControl } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "./reducer";
-import * as db from "../Database";
+import * as db from "../Database";      // 必须能导出 enrollments 数组
+import * as client from "./client";
 
 export default function Signin() {
   const [credentials, setCredentials] = useState<any>({});
+  const [error, setError] = useState<string>("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const signin = () => {
-    const user = db.users.find(
-      (u: any) =>
-        u.username === credentials.username &&
-        u.password === credentials.password
-    );
+  const signin = async () => {
+    setError("");
+    try {
+      const user = await client.signin(credentials);
+      if (!user) {
+        setError("Invalid username or password");
+        return;
+      }
 
-    if (!user) return; // 无效登录
+      // ✅ enrichment：把该用户的报名课程 ID 附加到 user 上
+      const enrolledCourseIds = db.enrollments
+        .filter((en) => en.user === user._id)
+        .map((en) => en.course);
 
-    // ✅ 获取该用户的所有报名课程 ID
-    const enrolledCourseIds = db.enrollments
-      .filter((enrollment) => enrollment.user === user._id)
-      .map((enrollment) => enrollment.course);
+      const enrichedUser = { ...user, enrolledCourseIds };
 
-    // ✅ 附加到 user 对象上
-    const enrichedUser = { ...user, enrolledCourseIds };
-
-    // ✅ 存入 Redux + localStorage
-    dispatch(setCurrentUser(enrichedUser));
-
-    // ✅ 跳转到 Dashboard
-    navigate("/Kambaz/Dashboard");
+      dispatch(setCurrentUser(enrichedUser));
+      navigate("/Kambaz/Dashboard");
+    } catch (e: any) {
+      setError(e?.response?.data?.message || e?.message || "Sign in failed");
+    }
   };
 
   return (
     <div id="wd-signin-screen" className="p-4">
       <h1>Sign in</h1>
+
+      {error && <div className="alert alert-danger mb-3">{error}</div>}
+
       <FormControl
         placeholder="Username"
         value={credentials.username || ""}
@@ -54,9 +58,11 @@ export default function Signin() {
         }
         className="mb-3"
       />
+
       <Button onClick={signin} className="w-100 mb-2">
         Sign In
       </Button>
+
       <Link to="/Kambaz/Account/Signup">Don't have an account? Sign up</Link>
     </div>
   );

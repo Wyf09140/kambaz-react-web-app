@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useParams } from "react-router";
 import { ListGroup, FormControl } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
@@ -6,12 +6,15 @@ import LessonControlButtons from "./LessonControlButtons";
 import ModulesControls from "./ModulesControls";
 import ModuleControlButtons from "./ModuleControlButtons";
 import {
+  setModules,
   addModule,
   editModule,
   updateModule,
   deleteModule,
 } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
+import * as coursesClient from "../client";
+import * as modulesClient from "../client";
 
 export default function Modules() {
   const { cid } = useParams();
@@ -20,7 +23,19 @@ export default function Modules() {
   const currentUser = useSelector((state: any) => state.accountReducer.currentUser);
   const isFaculty = currentUser?.role === "FACULTY";
   const dispatch = useDispatch();
+  const saveModule = async (module: any) => {
+    await modulesClient.updateModule(module);
+    dispatch(updateModule(module));
+  };
 
+  const fetchModules = async () => {
+    const modules = await coursesClient.findModulesForCourse(cid as string);
+    dispatch(setModules(modules));
+  };
+  useEffect(() => {
+    fetchModules();
+  }, []);
+  
   const handleAddModule = () => {
     if (!moduleName.trim()) return;
     dispatch(addModule({ name: moduleName, course: cid }));
@@ -39,6 +54,19 @@ export default function Modules() {
     dispatch(updateModule(module));
   };
 
+  const createModuleForCourse = async () => {
+    if (!cid) return;
+    const newModule = { name: moduleName, course: cid };
+    const module = await coursesClient.createModuleForCourse(cid, newModule);
+    dispatch(addModule(module));
+  };
+
+  const removeModule = async (moduleId: string) => {
+    await modulesClient.deleteModule(moduleId);
+    dispatch(deleteModule(moduleId));
+  };
+
+
   return (
     <div className="wd-modules">
       {/* ✅ 只有 FACULTY 可见 */}
@@ -46,14 +74,13 @@ export default function Modules() {
         <ModulesControls
           moduleName={moduleName}
           setModuleName={setModuleName}
-          addModule={handleAddModule}
+          addModule={createModuleForCourse}
         />
       )}
 
       <ListGroup id="wd-modules" className="rounded-0">
         {Array.isArray(modules) &&
           modules
-            .filter((module: any) => module.course === cid)
             .map((module: any) => (
               <ListGroup.Item
                 key={module._id}
@@ -74,12 +101,10 @@ export default function Modules() {
                           })
                         }
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleUpdateModule({
-                              ...module,
-                              editing: false,
-                            });
-                          }
+                          if (e.key === "Enter")  {
+                             saveModule({ ...module, editing: false });
+                }
+
                         }}
                       />
                     )}
@@ -87,11 +112,9 @@ export default function Modules() {
 
                   {/* ✅ 只有 FACULTY 可见按钮 */}
                   {isFaculty && (
-                    <ModuleControlButtons
-                      moduleId={module._id}
-                      deleteModule={() => handleDeleteModule(module._id)}
-                      editModule={() => handleEditModule(module._id)}
-                    />
+                     <ModuleControlButtons moduleId={module._id}
+                      deleteModule={(moduleId) => removeModule(moduleId)}
+                      editModule={(moduleId) => dispatch(editModule(moduleId))} />
                   )}
                 </div>
 

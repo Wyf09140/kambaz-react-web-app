@@ -12,7 +12,6 @@ export default function FindIndex() {
       <h3>FindIndex Function</h3>
       <p>fourIndex = {fourIndex}</p>
       <p>string3Index = {string3Index}</p>
-      {/* 你也可以在这里添加更多内容，比如用于调试 */}
     </div>
   );
 }
