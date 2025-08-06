@@ -21,7 +21,7 @@ export default function QueryParameters() {
         type="number"
         className="mb-2"
         value={b}
-        onChange={(e) => setB(e.target.value)}
+        onChange={(e) => setB(Number(e.target.value))}
       />
       <div>
         <a

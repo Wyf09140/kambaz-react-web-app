@@ -24,7 +24,7 @@ export default function Modules() {
   const currentUser = useSelector((state: any) => state.accountReducer.currentUser);
   const isFaculty = currentUser?.role === "FACULTY";
 
-  // 为每个模块维护独立的输入状态
+  // 每个模块独立的输入状态
   const [editNames, setEditNames] = useState<{ [key: string]: string }>({});
 
   const fetchModules = async () => {
@@ -42,7 +42,7 @@ export default function Modules() {
     const newModule = { name: moduleName, course: cid };
     const module = await coursesClient.createModuleForCourse(cid, newModule);
     dispatch(addModule(module));
-    setModuleName(""); // 清空输入框
+    setModuleName("");
   };
 
   const removeModule = async (moduleId: string) => {
@@ -61,8 +61,13 @@ export default function Modules() {
   };
 
   const handleSave = async (module: any) => {
-    await modulesClient.updateModule({ ...module, name: editNames[module._id], editing: false });
-    dispatch(updateModule({ ...module, name: editNames[module._id], editing: false }));
+    const updatedModule = {
+      ...module,
+      name: editNames[module._id],
+      editing: false,
+    };
+    await modulesClient.updateModule(updatedModule);
+    dispatch(updateModule(updatedModule));
   };
 
   return (
@@ -90,7 +95,9 @@ export default function Modules() {
                     <FormControl
                       className="w-50 d-inline-block"
                       value={editNames[module._id] || ""}
-                      onChange={(e) => handleChange(module._id, e.target.value)}
+                      onChange={(e) =>
+                        handleChange(module._id, e.target.value)
+                      }
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           handleSave(module);
