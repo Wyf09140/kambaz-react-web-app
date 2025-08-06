@@ -36,19 +36,6 @@ export default function Modules() {
     fetchModules();
   }, []);
   
-  const handleAddModule = () => {
-    if (!moduleName.trim()) return;
-    dispatch(addModule({ name: moduleName, course: cid }));
-    setModuleName("");
-  };
-
-  const handleDeleteModule = (moduleId: string) => {
-    dispatch(deleteModule(moduleId));
-  };
-
-  const handleEditModule = (moduleId: string) => {
-    dispatch(editModule(moduleId));
-  };
 
   const handleUpdateModule = (module: any) => {
     dispatch(updateModule(module));
