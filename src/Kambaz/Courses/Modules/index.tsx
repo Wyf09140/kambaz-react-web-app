@@ -45,9 +45,12 @@ export default function Modules() {
   };
 
   const removeModule = async (moduleId: string) => {
+    if (!cid) return;
     await modulesClient.deleteModule(cid, moduleId);
     dispatch(deleteModule(moduleId));
   };
+
+
 
   const handleEdit = (moduleId: string, currentName: string) => {
     dispatch(editModule(moduleId));
@@ -69,6 +72,7 @@ export default function Modules() {
   };
 
   const handleSave = async (module: any) => {
+    if (!cid) return;
     const updatedModule = {
       ...module,
       name: editNames[module._id],
