@@ -13,7 +13,8 @@ export default function QueryParameters() {
         type="number"
         className="mb-2"
         value={a}
-        onChange={(e) => setA(e.target.value)}
+          onChange={(e) => setA(Number(e.target.value))}
+
       />
       <input
         id="wd-query-parameter-b"
