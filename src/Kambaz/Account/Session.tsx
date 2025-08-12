@@ -1,23 +1,31 @@
-import * as client from "./client";
+// src/Kambaz/Account/Session.tsx
 import { useEffect, useState } from "react";
-import { setCurrentUser } from "./reducer";
 import { useDispatch } from "react-redux";
-export default function Session({ children }: { children: any }) {
+import * as client from "./client";
+import { setCurrentUser } from "./reducer";
+
+export default function Session({ children }: { children: React.ReactNode }) {
   const [pending, setPending] = useState(true);
   const dispatch = useDispatch();
-  const fetchProfile = async () => {
-    try {
-      const currentUser = await client.profile();
-      dispatch(setCurrentUser(currentUser));
-    } catch (err: any) {
-      console.error(err);
-    }
-    setPending(false);
-  };
+
   useEffect(() => {
-    fetchProfile();
-  }, []);
-  if (!pending) {
-    return children;
-  }
+    (async () => {
+      try {
+        const me = await client.profile();       // 已登录 -> 200
+        dispatch(setCurrentUser(me));
+      } catch (err: any) {
+        // 未登录 -> 401，静默处理即可
+        if (err?.response?.status === 401) {
+          dispatch(setCurrentUser(null as any));
+        } else {
+          console.error(err);
+        }
+      } finally {
+        setPending(false);
+      }
+    })();
+  }, [dispatch]);
+
+  if (pending) return null; // 或者返回一个 Loading UI
+  return <>{children}</>;
 }
