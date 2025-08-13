@@ -8,7 +8,6 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import Lab5 from "./Lab5/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
-import mongoose from "mongoose";
 
 
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz"
@@ -19,7 +18,8 @@ app.use(cors({
   credentials: true,
   origin: [
     "https://a5--cosmic-pithivier-a2929c.netlify.app",
-    "http://localhost:5173",
+    "https://a6--cosmic-pithivier-a2929c.netlify.app",
+    "http://localhost:5173"
   ],
 }));
 
