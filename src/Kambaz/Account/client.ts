@@ -68,3 +68,48 @@ export const createUser = async (user: any) => {
   const response = await axios.post(`${USERS_API}`, user);
   return response.data;
 };
+
+export const findCoursesForUser = async (userId: string) => {
+const response = await axiosWithCredentials.get(`${USERS_API}/${userId}/courses`);
+return response.data;
+};
+
+export const enrollIntoCourse = async (userId: string, courseId: string) => {
+const response = await axiosWithCredentials.post(`${USERS_API}/${userId}/courses/${courseId}`);
+return response.data;
+};
+export const unenrollFromCourse = async (userId: string, courseId: string) => {
+const response = await axiosWithCredentials.delete(`${USERS_API}/${userId}/courses/${courseId}`);
+return response.data;
+};
+
+export const findUsersForCourse = async (courseId: string) => {
+  const { data } = await axiosWithCredentials.get(
+    `${REMOTE_SERVER}/api/courses/${courseId}/users`
+  );
+  return data;
+};
+
+export const ENROLLMENTS_API = `${REMOTE_SERVER}/api/enrollments`;
+
+export const enroll = async (userId: string, courseId: string) => {
+  const { data } = await axiosWithCredentials.post(ENROLLMENTS_API, {
+    user: userId,
+    course: courseId,
+  });
+  return data; // -> enrollment 文档
+};
+
+/** 退课 */
+export const unenroll = async (userId: string, courseId: string) => {
+  const { data } = await axiosWithCredentials.delete(
+    `${ENROLLMENTS_API}/${userId}/${courseId}`
+  );
+  return data; // -> { deletedCount: n }
+};
+
+export const createCourseForCurrentUser = async (course: any) => {
+  // 你的后端在 POST /api/courses 时会把 currentUser 自动加入该课
+  const { data } = await axiosWithCredentials.post(`${REMOTE_SERVER}/api/courses`, course);
+  return data;
+};

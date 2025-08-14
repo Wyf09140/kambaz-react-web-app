@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { Card, Button, Row, Col, FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { enrollCourse, unenrollCourse } from "./Account/reducer";
+import { useSelector } from "react-redux";
 
 export default function Dashboard({
   courses,
@@ -11,38 +9,34 @@ export default function Dashboard({
   addNewCourse,
   deleteCourse,
   updateCourse,
+  enrolling,
+  setEnrolling,
+  updateEnrollment,
 }: {
   courses: any[];
   course: any;
   setCourse: (course: any) => void;
   addNewCourse: () => void;
-  deleteCourse: (course: any) => void;
+  deleteCourse: (courseId: string) => void; // ✅ 修正类型
   updateCourse: () => void;
+  enrolling: boolean;
+  setEnrolling: (enrolling: boolean) => void;
+  updateEnrollment: (courseId: string, enrolled: boolean) => void; // 调用后端选/退课
 }) {
-  const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const [showAllCourses, setShowAllCourses] = useState(false);
-  const enrolledCourseIds = currentUser?.enrolledCourseIds || [];
-
-  const filteredCourses = courses.filter((course) => {
-    if (currentUser?.role === "FACULTY") return true;
-    if (showAllCourses) return true;
-    return enrolledCourseIds.includes(course._id);
-  });
+  const enrolledCourseIds: string[] = currentUser?.enrolledCourseIds || [];
 
   return (
     <div id="wd-dashboard">
-      <h1 id="wd-dashboard-title">Dashboard</h1>
-
-      {currentUser?.role === "STUDENT" && (
-        <Button
-          className="float-end mb-3"
-          variant="primary"
-          onClick={() => setShowAllCourses(!showAllCourses)}
+      <h1 id="wd-dashboard-title">
+        Dashboard
+        <button
+          onClick={() => setEnrolling(!enrolling)}
+          className="float-end btn btn-primary"
         >
-          {showAllCourses ? "Show My Courses" : "Show All Courses"}
-        </Button>
-      )}
+          {enrolling ? "My Courses" : "All Courses"}
+        </button>
+      </h1>
 
       <hr />
 
@@ -85,39 +79,52 @@ export default function Dashboard({
         </>
       )}
 
-      <h2 id="wd-dashboard-published">
-        Published Courses ({filteredCourses.length})
-      </h2>
+      <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2>
       <hr />
 
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {filteredCourses.map((course) => (
+          {courses.map((c) => (
             <Col
-              key={course._id}
+              key={c._id}
               className="wd-dashboard-course"
               style={{ width: "300px" }}
             >
               <Link
-                to={`/Kambaz/Courses/${course._id}/Home`}
+                to={`/Kambaz/Courses/${c._id}/Home`}
                 className="wd-dashboard-course-link text-decoration-none text-dark"
               >
                 <Card>
                   <Card.Img
-                    src={course.image}
+                    src={c.image}
                     variant="top"
                     width="100%"
                     height={160}
                   />
                   <Card.Body className="card-body">
                     <Card.Title className="wd-dashboard-course-title text-nowrap overflow-hidden">
-                      {course.name}
+                      {enrolling && (
+                        <button
+                          onClick={(event) => {
+                            event.preventDefault();
+                            // ✅ 顶部按钮：调用后端更新选课
+                            updateEnrollment(c._id, !c.enrolled);
+                          }}
+                          className={`btn ${
+                            c.enrolled ? "btn-danger" : "btn-success"
+                          } float-end`}
+                        >
+                          {c.enrolled ? "Unenroll" : "Enroll"}
+                        </button>
+                      )}
+                      {c.name}
                     </Card.Title>
+
                     <Card.Text
                       className="wd-dashboard-course-description overflow-hidden"
                       style={{ height: "100px" }}
                     >
-                      {course.description}
+                      {c.description}
                     </Card.Text>
 
                     {currentUser?.role === "FACULTY" && (
@@ -126,7 +133,7 @@ export default function Dashboard({
                         <Button
                           onClick={(event) => {
                             event.preventDefault();
-                            deleteCourse(course._id);
+                            deleteCourse(c._id);
                           }}
                           className="btn btn-danger float-end"
                         >
@@ -135,7 +142,7 @@ export default function Dashboard({
                         <Button
                           onClick={(event) => {
                             event.preventDefault();
-                            setCourse(course);
+                            setCourse(c);
                           }}
                           className="btn btn-warning me-2 float-end"
                         >
@@ -147,13 +154,14 @@ export default function Dashboard({
                     {currentUser?.role === "STUDENT" && (
                       <>
                         <Button variant="primary">Go</Button>
-                        {enrolledCourseIds.includes(course._id) ? (
+                        {enrolledCourseIds.includes(c._id) ? (
                           <Button
                             variant="danger"
                             className="float-end"
                             onClick={(e) => {
                               e.preventDefault();
-                              dispatch(unenrollCourse(course._id));
+                              // ✅ 底部按钮：同样走后端
+                              updateEnrollment(c._id, false);
                             }}
                           >
                             Unenroll
@@ -164,7 +172,8 @@ export default function Dashboard({
                             className="float-end"
                             onClick={(e) => {
                               e.preventDefault();
-                              dispatch(enrollCourse(course._id));
+                              // ✅ 底部按钮：同样走后端
+                              updateEnrollment(c._id, true);
                             }}
                           >
                             Enroll

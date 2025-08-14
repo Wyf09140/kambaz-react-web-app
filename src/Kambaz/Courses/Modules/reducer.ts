@@ -20,8 +20,8 @@ const modulesSlice = createSlice({
   name: "modules",
   initialState,
   reducers: {
-    setModules: (state, action) => {
-      state.modules = action.payload;
+    setModules: (state, { payload: modules }) => {
+      state.modules = modules;
     },
     addModule: (state, action) => {
       state.modules.push(action.payload);
@@ -47,7 +47,7 @@ export const {
   addModule,
   deleteModule,
   updateModule,
-  editModule,
+  editModule
 } = modulesSlice.actions;
 
 export default modulesSlice.reducer;

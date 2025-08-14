@@ -1,55 +1,41 @@
 // Kambaz/Assignments/dao.js
-import Database from "../Database/index.js";
-import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
 
-// 统一读/写入口，避免本地副本与 Database 脱节
-const getAll = () => Database.assignments ?? [];
-const saveAll = (next) => { Database.assignments = next; };
+/** 按课程查询所有作业（最新在前） */
+export async function findAssignmentsForCourse(courseId) {
+  return model
+    .find({ course: courseId })
+    .sort({ updatedAt: -1, createdAt: -1 });
+}
 
-/** 按课程取作业列表 */
-export const findAssignmentsForCourse = (cid) =>
-  getAll().filter((a) => a.course === cid);
+/** 按作业ID查询单个 */
+export function findAssignmentById(assignmentId) {
+  return model.findById(assignmentId);
+}
 
-/** 按作业ID取单个 */
-export const findAssignmentById = (aid) =>
-  getAll().find((a) => a._id === aid);
-
-/** 新建作业（返回新作业） */
-export const createAssignment = (cid, assignment = {}) => {
-  const fresh = {
-    _id: uuidv4(),
-    course: cid,                                  // 强制归属课程
-    title: assignment.title ?? "New Assignment",
-    description: assignment.description ?? "",
-    points: assignment.points ?? 100,
-    dueDate: assignment.dueDate ?? new Date().toISOString().slice(0, 10),
-    availableFromDate: assignment.availableFromDate ?? null,
-    untilDate: assignment.untilDate ?? null,
+/** 新建作业（强制归属到 courseId） */
+export function createAssignment(courseId, assignment = {}) {
+  const doc = {
+    title: "New Assignment",
+    description: "",
+    points: 100,
+    course: courseId,
     ...assignment,
-    course: cid,                                  // 覆盖防止外部传错
+    course: courseId, // 覆盖防止外部传错课程
   };
-  const next = [...getAll(), fresh];
-  saveAll(next);
-  return fresh;
-};
+  return model.create(doc);
+}
 
-/** 更新作业（返回更新后的对象；不存在则返回 null） */
-export const updateAssignment = (aid, updates = {}) => {
-  const list = getAll();
-  const idx = list.findIndex((a) => a._id === aid);
-  if (idx === -1) return null;
-  const updated = { ...list[idx], ...updates, _id: aid };
-  const next = [...list];
-  next[idx] = updated;
-  saveAll(next);
-  return updated;
-};
+/** 更新作业（返回更新后的文档） */
+export function updateAssignment(assignmentId, updates = {}) {
+  return model.findByIdAndUpdate(
+    assignmentId,
+    { $set: updates },
+    { new: true }
+  );
+}
 
-/** 删除作业（返回是否删除成功） */
-export const deleteAssignment = (aid) => {
-  const list = getAll();
-  const next = list.filter((a) => a._id !== aid);
-  const removed = next.length !== list.length;
-  if (removed) saveAll(next);
-  return removed;
-};
+/** 删除作业（返回 { deletedCount }） */
+export function deleteAssignment(assignmentId) {
+  return model.deleteOne({ _id: assignmentId });
+}

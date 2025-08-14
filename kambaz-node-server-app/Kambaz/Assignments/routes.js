@@ -2,33 +2,68 @@
 import * as dao from "./dao.js";
 
 export default function AssignmentRoutes(app) {
-  // list by course
-  app.get("/api/courses/:cid/assignments", (req, res) => {
-    res.json(dao.findAssignmentsForCourse(req.params.cid));
+  // 列出某门课的所有作业
+  app.get("/api/courses/:cid/assignments", async (req, res) => {
+    try {
+      const list = await dao.findAssignmentsForCourse(req.params.cid);
+      res.json(list);
+    } catch (err) {
+      console.error("GET /courses/:cid/assignments error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 
-  // get one
-  app.get("/api/assignments/:aid", (req, res) => {
-    const a = dao.findAssignmentById(req.params.aid);
-    if (!a) return res.sendStatus(404);
-    res.json(a);
+  // 获取单个作业
+  app.get("/api/assignments/:aid", async (req, res) => {
+    try {
+      const item = await dao.findAssignmentById(req.params.aid);
+      if (!item) return res.sendStatus(404);
+      res.json(item);
+    } catch (err) {
+      console.error("GET /assignments/:aid error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 
-  // create
-  app.post("/api/courses/:cid/assignments", (req, res) => {
-    const created = dao.createAssignment(req.params.cid, req.body);
-    res.status(201).json(created);
+  // 新建作业
+  app.post("/api/courses/:cid/assignments", async (req, res) => {
+    try {
+      const created = await dao.createAssignment(req.params.cid, req.body);
+      res.status(201).json(created);
+    } catch (err) {
+      // Mongoose 校验失败
+      if (err?.name === "ValidationError") {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error("POST /courses/:cid/assignments error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 
-  // update
-  app.put("/api/assignments/:aid", (req, res) => {
-    dao.updateAssignment(req.params.aid, req.body);
-    res.sendStatus(204); // 按要求返回 204
+  // 更新作业（返回更新后的文档）
+  app.put("/api/assignments/:aid", async (req, res) => {
+    try {
+      const updated = await dao.updateAssignment(req.params.aid, req.body);
+      if (!updated) return res.sendStatus(404);
+      res.json(updated);
+    } catch (err) {
+      if (err?.name === "ValidationError") {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error("PUT /assignments/:aid error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 
-  // delete
-  app.delete("/api/assignments/:aid", (req, res) => {
-    dao.deleteAssignment(req.params.aid);
-    res.sendStatus(204); // 按要求返回 204
+  // 删除作业
+  app.delete("/api/assignments/:aid", async (req, res) => {
+    try {
+      const result = await dao.deleteAssignment(req.params.aid);
+      if (!result?.deletedCount) return res.sendStatus(404);
+      res.sendStatus(204);
+    } catch (err) {
+      console.error("DELETE /assignments/:aid error:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
   });
 }

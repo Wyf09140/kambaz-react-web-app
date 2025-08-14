@@ -20,9 +20,12 @@ export const createAssignment = async (cid: string, a: any) => {
 };
 
 export const updateAssignment = async (aid: string, updates: any) => {
-  await api.put(`${BASE}/assignments/${aid}`, updates); // 204
+  const { data } = await api.put(`${BASE}/assignments/${aid}`, updates);
+  return data;
+};
+export const deleteAssignment = async (aid: string) => {
+  await api.delete(`${BASE}/assignments/${aid}`);
+  return true;
 };
 
-export const deleteAssignment = async (aid: string) => {
-  await api.delete(`${BASE}/assignments/${aid}`); // 204
-};
+export * from "../client";

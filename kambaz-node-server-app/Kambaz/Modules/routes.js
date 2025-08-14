@@ -21,13 +21,9 @@ export default function ModuleRoutes(app) {
 
   // 删除模块：DELETE /api/modules/:moduleId
   app.delete("/api/modules/:moduleId", async (req, res) => {
-    try {
-      const { moduleId } = req.params;
-      await modulesDao.deleteModule(moduleId);
-      res.sendStatus(204);
-    } catch (err) {
-      console.error(err);
-      res.sendStatus(500);
-    }
-  });
+    const { moduleId } = req.params;
+    const status = await modulesDao.deleteModule(moduleId);
+    res.send(status);
+});
+
 }
