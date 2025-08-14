@@ -14,7 +14,7 @@ import {
 } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
 import * as coursesClient from "../client";  // ✅ 课程相关（按课取模块、创建模块）
-import * as modulesClient from "./client";   // ✅ 模块资源自身（更新、删除）
+import * as modulesClient from "../client";   // ✅ 模块资源自身（更新、删除）
 
 export default function Modules() {
   const { cid } = useParams();
