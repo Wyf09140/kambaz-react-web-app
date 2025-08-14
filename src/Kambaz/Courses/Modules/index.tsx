@@ -13,8 +13,8 @@ import {
   deleteModule,
 } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
-import * as coursesClient from "../client";  // ✅ 课程相关（按课取模块、创建模块）
-import * as modulesClient from "../client";   // ✅ 模块资源自身（更新、删除）
+import * as coursesClient from "../client";  // ✅ 课程相关：按课程取/创模块
+import * as modulesClient from "./client";   // ✅ 模块资源：更/删模块（只要 1 个参数）
 
 export default function Modules() {
   const { cid } = useParams();
@@ -24,7 +24,10 @@ export default function Modules() {
   const currentUser = useSelector((state: any) => state.accountReducer.currentUser);
   const isFaculty = currentUser?.role === "FACULTY";
 
-  // 拉取当前课程的模块
+  // 本地编辑名称缓存（仍保留以支持回车保存等）
+  const [editNames, setEditNames] = useState<{ [key: string]: string }>({});
+
+  // 统一拉取
   const loadModules = async () => {
     if (!cid) return;
     const list = await coursesClient.findModulesForCourse(cid);
@@ -35,7 +38,7 @@ export default function Modules() {
     loadModules();
   }, [cid]);
 
-  // 新建模块（走 Courses client：POST /api/courses/:cid/modules）
+  // 新建（POST /api/courses/:cid/modules）
   const addModuleHandler = async () => {
     if (!cid || !moduleName.trim()) return;
     const created = await coursesClient.createModuleForCourse(cid, {
@@ -46,16 +49,33 @@ export default function Modules() {
     setModuleName("");
   };
 
-  // 删除模块（走 Modules client：DELETE /api/modules/:id）
+  // 删除（DELETE /api/modules/:id）
   const deleteModuleHandler = async (moduleId: string) => {
-    await modulesClient.deleteModule(moduleId); // ✅ 只传 id
+    await modulesClient.deleteModule(moduleId);        // ✅ 只传 1 个参数
     dispatch(deleteModule(moduleId));
   };
 
-  // 更新模块（走 Modules client：PUT /api/modules/:id）
+  // 更新（PUT /api/modules/:id）
   const updateModuleHandler = async (module: any) => {
-    await modulesClient.updateModule(module); // ✅ 只传整个 module
+    await modulesClient.updateModule(module);          // ✅ 只传 1 个参数
     dispatch(updateModule(module));
+  };
+
+  // 进入编辑态时记住当前名字
+  const handleEdit = (moduleId: string, currentName: string) => {
+    dispatch(editModule(moduleId));
+    setEditNames((prev) => ({ ...prev, [moduleId]: currentName }));
+  };
+
+  // 输入变化：本地/全局都更新名字，按回车即保存
+  const handleChange = (module: any, value: string) => {
+    setEditNames((prev) => ({ ...prev, [module._id]: value }));
+    dispatch(updateModule({ ...module, name: value }));
+  };
+
+  const handleEnterSave = async (module: any) => {
+    const name = editNames[module._id] ?? module.name;
+    await updateModuleHandler({ ...module, name, editing: false });
   };
 
   return (
@@ -82,14 +102,10 @@ export default function Modules() {
                   {module.editing && (
                     <FormControl
                       className="w-50 d-inline-block"
-                      defaultValue={module.name}
-                      onChange={(e) =>
-                        updateModuleHandler({ ...module, name: e.target.value })
-                      }
+                      value={editNames[module._id] ?? module.name ?? ""}
+                      onChange={(e) => handleChange(module, e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          updateModuleHandler({ ...module, editing: false });
-                        }
+                        if (e.key === "Enter") handleEnterSave(module);
                       }}
                     />
                   )}
@@ -99,7 +115,9 @@ export default function Modules() {
                   <ModuleControlButtons
                     moduleId={module._id}
                     deleteModule={(moduleId) => deleteModuleHandler(moduleId)}
-                    editModule={(moduleId) => dispatch(editModule(moduleId))}
+                    editModule={(moduleId) =>
+                      handleEdit(moduleId, module.name ?? "")
+                    }
                   />
                 )}
               </div>
