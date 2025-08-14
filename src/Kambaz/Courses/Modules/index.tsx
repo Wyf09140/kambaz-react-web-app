@@ -13,8 +13,8 @@ import {
   deleteModule,
 } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
-import * as coursesClient from "../client";
-import * as modulesClient from "../client";
+import * as coursesClient from "../client";  // ✅ 课程相关（按课取模块、创建模块）
+import * as modulesClient from "./client";   // ✅ 模块资源自身（更新、删除）
 
 export default function Modules() {
   const { cid } = useParams();
@@ -24,90 +24,38 @@ export default function Modules() {
   const currentUser = useSelector((state: any) => state.accountReducer.currentUser);
   const isFaculty = currentUser?.role === "FACULTY";
 
-  const [editNames, setEditNames] = useState<{ [key: string]: string }>({});
-
-  const fetchModulesForCourse = async () => {
-    const modules = await coursesClient.findModulesForCourse(cid!);
-    dispatch(setModules(modules));
-  };
-  useEffect(() => {
-    fetchModulesForCourse();
-  }, [cid]);
-
-  const fetchModules = async () => {
+  // 拉取当前课程的模块
+  const loadModules = async () => {
     if (!cid) return;
-    const modules = await coursesClient.findModulesForCourse(cid);
-    dispatch(setModules(modules));
+    const list = await coursesClient.findModulesForCourse(cid);
+    dispatch(setModules(list));
   };
 
   useEffect(() => {
-    fetchModules();
+    loadModules();
   }, [cid]);
 
-  const createModuleForCourse = async () => {
-    if (!cid) return;
-    const newModule = { name: moduleName, course: cid };
-    const module = await coursesClient.createModuleForCourse(cid, newModule);
-    dispatch(addModule(module));
-    setModuleName("");
-  };
-
-  const deleteModuleHandler = async (moduleId: string) => {
-    await modulesClient.deleteModule(moduleId);
-    dispatch(deleteModule(moduleId));
-    };
-
-
+  // 新建模块（走 Courses client：POST /api/courses/:cid/modules）
   const addModuleHandler = async () => {
-    const newModule = await courseClient.createModuleForCourse(cid!, {
-      name: moduleName,
+    if (!cid || !moduleName.trim()) return;
+    const created = await coursesClient.createModuleForCourse(cid, {
+      name: moduleName.trim(),
       course: cid,
     });
-    dispatch(addModule(newModule));
+    dispatch(addModule(created));
     setModuleName("");
   };
 
-  const updateModuleHandler = async (module: any) => {
-      await modulesClient.updateModule(module);
-      dispatch(updateModule(module));
-  };
-
-  const removeModule = async (moduleId: string) => {
-    if (!cid) return;
-    await modulesClient.deleteModule(cid, moduleId);
+  // 删除模块（走 Modules client：DELETE /api/modules/:id）
+  const deleteModuleHandler = async (moduleId: string) => {
+    await modulesClient.deleteModule(moduleId); // ✅ 只传 id
     dispatch(deleteModule(moduleId));
   };
 
-
-
-  const handleEdit = (moduleId: string, currentName: string) => {
-    dispatch(editModule(moduleId));
-    setEditNames((prev) => ({ ...prev, [moduleId]: currentName }));
-  };
-
-  const handleChange = (moduleId: string, value: string) => {
-    setEditNames((prev) => ({ ...prev, [moduleId]: value }));
-
-    const oldModule = modules.find((m: any) => m._id === moduleId);
-    if (!oldModule) return;
-
-    const updatedModule = {
-      ...oldModule,
-      name: value,
-    };
-
-    dispatch(updateModule(updatedModule));
-  };
-
-  const handleSave = async (module: any) => {
-    if (!cid) return;
-    const updatedModule = {
-      ...module,
-      name: editNames[module._id],
-      editing: false,
-    };
-    await modulesClient.updateModule(cid, updatedModule);
-    dispatch(updateModule(updatedModule));
+  // 更新模块（走 Modules client：PUT /api/modules/:id）
+  const updateModuleHandler = async (module: any) => {
+    await modulesClient.updateModule(module); // ✅ 只传整个 module
+    dispatch(updateModule(module));
   };
 
   return (
@@ -134,7 +82,7 @@ export default function Modules() {
                   {module.editing && (
                     <FormControl
                       className="w-50 d-inline-block"
-                      value={editNames[module._id] || ""}
+                      defaultValue={module.name}
                       onChange={(e) =>
                         updateModuleHandler({ ...module, name: e.target.value })
                       }
