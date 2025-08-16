@@ -88,5 +88,8 @@ app.get("/", (req, res) => {
   res.send("Backend is running!");
 });
 
-// ⭐ Render 要用平台提供的端口
-const PORT = process.
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
+
