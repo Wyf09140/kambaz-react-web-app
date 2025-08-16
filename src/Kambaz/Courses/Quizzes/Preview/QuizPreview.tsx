@@ -127,7 +127,7 @@ export default function QuizPreview() {
 
       {/* 题目 */}
       <ol className="mt-3">
-        {questions.map((q, idx) => {
+        {questions.map((q, _idx) => {
           const choiceList = q.choices && q.choices.length ? q.choices : q.options || [];
           const showCorrect = submitted && !!scoring?.showCorrectAnswers;
           const got = submitted ? autoScore(q, answers[q._id]) : 0;
