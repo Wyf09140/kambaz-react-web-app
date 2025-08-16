@@ -8,19 +8,26 @@ import Home from "./Home";
 import Modules from "./Modules";
 import Assignments from "./Assignments";
 import AssignmentEditor from "./Assignments/Editor";
-
-// ✅ 用容器组件 People（会自己去调 /api/courses/:cid/users）
 import People from "./Home/People";
-// （可选）当 Redux 没有 courses 时，兜底从服务器拿一下课程名
 import * as coursesClient from "./client";
+
+// ⬇️ 引入真正的 Quizzes 页面组件
+import QuizList from "./Quizzes/Teacher/QuizList";
+import QuizDetails from "./Quizzes/QuizDetails";
+import QuizEditor from "./Quizzes/Teacher/QuizEditor";
+import QuestionsEditor from "./Quizzes/Teacher/QuestionsEditor";
+import TeacherPreview from "./Quizzes/Teacher/TeacherPreview";
+import StudentTake from "./Quizzes/Student/StudentTake";
+import QuizResult from "./Quizzes/Student/StudentTake";
+import QuizGrades from "./Quizzes/Teacher/QuizGrades";
+import Result from "./Quizzes/Student/Result";
+import TeacherGrades from "./Quizzes/Teacher/TeacherGrades ";
 
 export default function Courses() {
   const { cid } = useParams();
   const { pathname } = useLocation();
 
-  // 1) 先尝试从 Redux 里拿（如果你的项目确实把 courses 放进了 Redux）
   const reduxCourses = useSelector((state: any) => {
-    // 兼容多种命名：state.courses 或 state.coursesReducer.courses
     if (Array.isArray(state?.courses)) return state.courses;
     if (Array.isArray(state?.coursesReducer?.courses)) return state.coursesReducer.courses;
     return null;
@@ -31,7 +38,6 @@ export default function Courses() {
     return reduxCourses.find((c: any) => String(c._id) === String(cid)) || null;
   }, [reduxCourses, cid]);
 
-  // 2) 如果 Redux 没有，就兜底到服务端取一下（只为标题展示课程名，不影响页面路由功能）
   const [fallbackCourse, setFallbackCourse] = useState<any>(null);
   useEffect(() => {
     const load = async () => {
@@ -51,9 +57,8 @@ export default function Courses() {
   }, [cid, courseFromRedux]);
 
   const courseName = courseFromRedux?.name || fallbackCourse?.name || "";
-  const section = pathname.split("/")[4] || ""; // e.g. Home / Modules / People
+  const section = pathname.split("/")[4] || "";
 
-  // 不再在这里因为找不到课程就直接报错；即使没拿到名字，页面依然能正常工作
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
@@ -76,8 +81,24 @@ export default function Courses() {
             <Route path="Assignments/new" element={<AssignmentEditor />} />
             <Route path="Assignments/:aid" element={<AssignmentEditor />} />
 
-            {/* ✅ 改为容器组件：内部自己拉取用户并渲染 Table */}
+            {/* ✅ 用真正的 Quizzes 组件，而不是占位 */}
+            <Route path="Quizzes" element={<QuizList />} />
+            <Route path="Quizzes/:qid" element={<QuizDetails />} />
+            <Route path="Quizzes/:qid/edit" element={<QuizEditor />} />
+            <Route path="Quizzes/:qid/edit/questions" element={<QuestionsEditor />} /> 
+            <Route path="Quizzes/:qid/preview" element={<TeacherPreview />} />
             <Route path="People" element={<People />} />
+            <Route path="Quizzes/:qid/take" element={<StudentTake />} />
+            <Route
+              path="Courses/:cid/Quizzes/:qid/preview"
+              element={<TeacherPreview />}
+            />
+            <Route path="Quizzes/:qid/result/:aid" element={<QuizResult />} />
+            <Route path="Quizzes/:qid/grades" element={<QuizGrades />} />
+            <Route path="Quizzes/:qid/result" element={<Result />} />
+            <Route path="Quizzes/:qid/grades" element={<TeacherGrades />} />
+
+
           </Routes>
         </div>
       </div>

@@ -12,7 +12,9 @@ import Courses from "./Courses";
 import "./styles.css";
 import * as accountClient from "./Account/client"; // enroll / unenroll
 import * as courseClient from "./Courses/client";   // fetchAllCourses / createCourse / updateCourse / deleteCourse
-// ❌ 未使用：import * as userClient from "./Account/client";
+import QuizPreview from "./Courses/Quizzes/QuizPreview";
+import TakeQuiz from "./Courses/Quizzes/TakeQuiz";
+
 
 export default function Kambaz() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -122,6 +124,10 @@ export default function Kambaz() {
 
             <Route path="Calendar" element={<h1>Calendar</h1>} />
             <Route path="Inbox" element={<h1>Inbox</h1>} />
+            <Route path="Courses/:cid/Quizzes/:qid/preview" element={<QuizPreview />} />
+            <Route path="Courses/:cid/Quizzes/:qid/take" element={<TakeQuiz />} />
+  
+
           </Routes>
         </div>
       </div>
