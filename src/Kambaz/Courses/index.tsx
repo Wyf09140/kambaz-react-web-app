@@ -21,7 +21,7 @@ import StudentTake from "./Quizzes/Student/StudentTake";
 import QuizResult from "./Quizzes/Student/StudentTake";
 import QuizGrades from "./Quizzes/Teacher/QuizGrades";
 import Result from "./Quizzes/Student/Result";
-import TeacherGrades from "./Quizzes/Teacher/TeacherGrades ";
+import TeacherGrades from "./Quizzes/Teacher/TeacherGrades";
 
 export default function Courses() {
   const { cid } = useParams();

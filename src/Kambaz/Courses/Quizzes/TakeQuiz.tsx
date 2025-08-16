@@ -24,7 +24,7 @@ export default function TakeQuiz() {
   const [questions, setQuestions] = useState<Q[]>([]);
   const [answers, setAnswers] = useState<A>({});
   const [attemptId, setAttemptId] = useState<string>("");
-  const [attemptStartedAt, setAttemptStartedAt] = useState<number | null>(null); // ms
+  const [ setAttemptStartedAt] = useState<number | null>(null); // ms
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
