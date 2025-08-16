@@ -24,7 +24,7 @@ export default function TakeQuiz() {
   const [questions, setQuestions] = useState<Q[]>([]);
   const [answers, setAnswers] = useState<A>({});
   const [attemptId, setAttemptId] = useState<string>("");
-  const [ setAttemptStartedAt] = useState<number | null>(null); // ms
+  const [attemptStartedAt, setAttemptStartedAt] = useState<number | null>(null); // ✅ 修复
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -32,12 +32,12 @@ export default function TakeQuiz() {
 
   // one-at-a-time
   const [idx, setIdx] = useState(0);
-  const lockedRef = useRef<Set<string>>(new Set()); // 已锁题目
-  const dirtyRef = useRef(false);                    // 是否需要自动保存
-  const autoSubmitOnce = useRef(false);             // 避免重复提交
+  const lockedRef = useRef<Set<string>>(new Set());
+  const dirtyRef = useRef(false);
+  const autoSubmitOnce = useRef(false);
 
   // 计时
-  const [remaining, setRemaining] = useState<number | null>(null); // 秒
+  const [remaining, setRemaining] = useState<number | null>(null);
   const hasTimeLimit = useMemo(
     () => Number(quiz?.scoring?.timeLimit || 0) > 0,
     [quiz?.scoring?.timeLimit]
@@ -59,15 +59,16 @@ export default function TakeQuiz() {
         setQuiz(data.quiz);
         setQuestions((data.questions || []) as Q[]);
 
-        const sa = await startAttempt(qid); // 后端从 session 取 user
+        const sa = await startAttempt(qid); 
         const a = sa.data;
         setAttemptId(a._id);
+
         // 记录后端 startedAt（统一以此为准）
         const startedAtMs = a?.startedAt ? new Date(a.startedAt).getTime() : Date.now();
-        setAttemptStartedAt(startedAtMs);
+        setAttemptStartedAt(startedAtMs);   // ✅ 存入 state
 
         // 初始化倒计时
-        const tlSec = Number(data.quiz?.scoring?.timeLimit || 0); // 秒
+        const tlSec = Number(data.quiz?.scoring?.timeLimit || 0);
         if (tlSec > 0) {
           const usedSec = Math.floor((Date.now() - startedAtMs) / 1000);
           setRemaining(Math.max(0, tlSec - usedSec));
@@ -89,7 +90,7 @@ export default function TakeQuiz() {
     if (remaining <= 0) {
       if (!autoSubmitOnce.current) {
         autoSubmitOnce.current = true;
-        onSubmit(); // 时间到自动提交
+        onSubmit();
       }
       return;
     }
@@ -97,7 +98,7 @@ export default function TakeQuiz() {
     return () => clearInterval(t);
   }, [hasTimeLimit, remaining, submitted]);
 
-  // 自动保存（每 15s 有改动才保存）
+  // 自动保存
   useEffect(() => {
     if (!attemptId || submitted) return;
     const t = setInterval(async () => {
@@ -105,25 +106,22 @@ export default function TakeQuiz() {
       try {
         await onSave();
         dirtyRef.current = false;
-      } catch {
-        // 忽略自动保存错误
-      }
+      } catch {}
     }, 15000);
     return () => clearInterval(t);
   }, [attemptId, submitted]);
 
-  // 离开提醒（未提交）
+  // 离开提醒
   useEffect(() => {
     if (submitted) return;
     const h = (e: BeforeUnloadEvent) => {
       e.preventDefault();
-      e.returnValue = ""; // 触发浏览器默认提示
+      e.returnValue = "";
     };
     window.addEventListener("beforeunload", h);
     return () => window.removeEventListener("beforeunload", h);
   }, [submitted]);
 
-  // helpers
   function setAns(q: Q, v: any) {
     setAnswers((prev) => {
       const next = { ...prev, [q._id]: v };
@@ -131,9 +129,7 @@ export default function TakeQuiz() {
       return next;
     });
 
-    // 如果启用锁题：oneQuestionAtATime && lockAfterAnswering
     if (quiz?.scoring?.oneQuestionAtATime && quiz?.scoring?.lockAfterAnswering) {
-      // 选中后即锁定该题
       lockedRef.current.add(String(q._id));
     }
   }
@@ -143,7 +139,6 @@ export default function TakeQuiz() {
     return lockedRef.current.has(String(q._id));
   }
 
-  // 把本地 answers 映射成后端需要的 responses[]
   function buildResponses() {
     const arr: any[] = [];
     for (const q of questions) {
@@ -180,11 +175,9 @@ export default function TakeQuiz() {
     }
   }
 
-  // UI 控制
   const oneAtATime = !!quiz?.scoring?.oneQuestionAtATime;
   const q = questions[idx];
 
-  // 倒计时显示 mm:ss
   function fmtMMSS(s: number) {
     const m = Math.floor(s / 60);
     const ss = s % 60;
@@ -233,11 +226,10 @@ export default function TakeQuiz() {
       <hr />
 
       {!oneAtATime ? (
-        // ---- 所有题一起展示 ----
         <ol className="mt-3">
           {questions.map((q: Q, i: number) => {
             const opts = q.options || q.choices || [];
-            const disabled = submitted; // 非分页模式不做锁题，提交后统一禁用
+            const disabled = submitted;
             return (
               <li key={q._id} className="mb-4">
                 <div className="mb-1">
@@ -314,7 +306,6 @@ export default function TakeQuiz() {
           })}
         </ol>
       ) : (
-        // ---- 分题展示（支持锁题）----
         <>
           <div className="mb-1">
             <b>{q?.title || `Question ${idx + 1}`}</b>{" "}
@@ -322,7 +313,6 @@ export default function TakeQuiz() {
           </div>
           <div dangerouslySetInnerHTML={{ __html: q?.prompt || "" }} className="mb-2" />
 
-          {/* 当前题目的禁用逻辑：提交后禁用；或启用锁题且该题已锁也禁用 */}
           {q && (
             <>
               {q.type === "MC" &&
