@@ -12,59 +12,75 @@ import UserRoutes from "./Kambaz/Users/routes.js";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
-// ⬇️ 新增：Quizzes 路由（Express Router 实例）
+// Quizzes
 import quizzesRouter from "./Kambaz/Quizzes/routes/quizzes.routes.js";
 import attemptsRouter from "./Kambaz/Quizzes/routes/attempts.routes.js";
 
 const CONNECTION_STRING =
   process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
-mongoose.connect(CONNECTION_STRING);
+await mongoose.connect(CONNECTION_STRING);
 
 const app = express();
 
+// ⭐ 在代理后面（Render）发 secure cookie 必须：
+app.set("trust proxy", 1);
+
+// ===== CORS（务必在路由和 session 之前）=====
+const allowlist =
+  (process.env.ALLOWED_ORIGINS?.split(",").map(s => s.trim()).filter(Boolean)) || [
+    "http://localhost:5173",
+    "https://final-project--cosmic-pithivier-a2929c.netlify.app", // 你当前的 Netlify 预览域
+    "https://a5--cosmic-pithivier-a2929c.netlify.app",
+    "https://a6--cosmic-pithivier-a2929c.netlify.app",
+  ];
+
 app.use(
   cors({
-    credentials: true,
-    origin: [
-      "https://a5--cosmic-pithivier-a2929c.netlify.app",
-      "https://a6--cosmic-pithivier-a2929c.netlify.app",
-      "http://localhost:5173",
-      "https://final-project--cosmic-pithivier-a2929c.netlify.app",
-
-    ],
+    origin(origin, cb) {
+      if (!origin) return cb(null, true);              // 允许无 Origin（健康检查等）
+      if (allowlist.includes(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,                                  // ⭐ 允许带 Cookie
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["set-cookie"],
   })
 );
+// 预检（有些平台需要显式 options）
+app.options("*", cors({ origin: (o,cb)=>cb(null,true), credentials: true }));
 
 // 解析 JSON
 app.use(express.json());
 
-// session（确保在挂载任何需要读 session 的中间件/路由之前）
+// ===== session（在需要读写 session 的路由之前）=====
+const PROD = process.env.NODE_ENV === "production";
+// ⭐ 跨站 Cookie 必须 sameSite: 'none' + secure: true
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "kambaz",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      sameSite: "lax",
-      // 若未来跨域到 https 站点，需要：sameSite: "none", secure: true
+      httpOnly: true,
+      sameSite: PROD ? "none" : "lax",  // ⭐ 生产用 none
+      secure:   PROD ? true   : false,  // ⭐ 生产用 true（需要 https + trust proxy）
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   })
 );
 
-// 🔐 将 session 用户映射到 req.user，供 Quizzes 控制器使用
+// 将 session 用户映射到 req.user
 app.use((req, res, next) => {
   req.user = req.session?.currentUser || null;
   next();
 });
 
-// 旧有路由（保持不变）
+// 路由
 UserRoutes(app);
 CourseRoutes(app);
 Lab5(app);
 ModuleRoutes(app);
-
-
-// ✅ 正确挂载 Quizzes / Attempts（注意是 app.use + 前缀）
 app.use("/api/quizzes", quizzesRouter);
 app.use("/api/attempts", attemptsRouter);
 
@@ -72,6 +88,5 @@ app.get("/", (req, res) => {
   res.send("Backend is running!");
 });
 
-app.listen(4000, () => {
-  console.log("Server running on http://localhost:4000");
-});
+// ⭐ Render 要用平台提供的端口
+const PORT = process.
