@@ -29,6 +29,8 @@ app.use(
       "https://a5--cosmic-pithivier-a2929c.netlify.app",
       "https://a6--cosmic-pithivier-a2929c.netlify.app",
       "http://localhost:5173",
+      "https://final-project--cosmic-pithivier-a2929c.netlify.app",
+
     ],
   })
 );
