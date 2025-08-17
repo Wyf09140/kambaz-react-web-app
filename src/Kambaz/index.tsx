@@ -91,7 +91,7 @@ export default function Kambaz() {
         <KambazNavigation />
         <div className="wd-main-content-offset p-3">
           <Routes>
-            <Route path="/" element={<Navigate to="Dashboard" />} />
+            <Route index element={<Navigate to="Account/Signin" replace />} />
             <Route path="Account/*" element={<Account />} />
 
             <Route
@@ -126,7 +126,8 @@ export default function Kambaz() {
             <Route path="Inbox" element={<h1>Inbox</h1>} />
             <Route path="Courses/:cid/Quizzes/:qid/preview" element={<QuizPreview />} />
             <Route path="Courses/:cid/Quizzes/:qid/take" element={<TakeQuiz />} />
-  
+            <Route path="*" element={<Navigate to="Account/Signin" replace />} />
+
 
           </Routes>
         </div>
