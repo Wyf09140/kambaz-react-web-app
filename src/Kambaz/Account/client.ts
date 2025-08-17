@@ -1,19 +1,21 @@
-// src/Kambaz/Account/client.ts
+// src/Kambaz/Account/client.ts（以及其他用 axios 的地方同理）
 import axios from "axios";
 
-// 统一后端基地址（部署时在 Netlify 环境变量里设置）
-const BASE_URL = import.meta.env.VITE_REMOTE_SERVER;
-if (!BASE_URL) {
+const DEV = import.meta.env.DEV;
+const PROD_BASE = import.meta.env.VITE_REMOTE_SERVER; // 必须配置为 Render 的 HTTPS 域名
+
+if (!DEV && !PROD_BASE) {
   console.error(
-    "[client] VITE_REMOTE_SERVER is missing. Example: https://kambaz-node-server-app-ufbd.onrender.com"
+    "[config] VITE_REMOTE_SERVER is missing in production! " +
+    "Set it to your Render URL, e.g. https://kambaz-node-server-app-ufbd.onrender.com"
   );
 }
 
-// 统一的 axios 实例：基地址 + 携带凭证（cookie）
 export const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: DEV ? "http://localhost:4000" : PROD_BASE,
   withCredentials: true,
 });
+
 
 // ========== Users ==========
 const USERS_API = "/api/users";
