@@ -87,7 +87,9 @@ export default function Signin() {
         </Button>
       </form>
 
-      <Link to="/Kambaz/Account/Signup">Don&apos;t have an account? Sign up</Link>
+      <Link to="/Kambaz/Account/Signup">Don&apos;t have an account? Sign up</Link><br />
+      <Link to="/Kambaz/Account/ProjectInfo">View Project Info</Link>
+
     </div>
   );
 }

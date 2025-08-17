@@ -14,7 +14,7 @@ import * as accountClient from "./Account/client"; // enroll / unenroll
 import * as courseClient from "./Courses/client";   // fetchAllCourses / createCourse / updateCourse / deleteCourse
 import QuizPreview from "./Courses/Quizzes/QuizPreview";
 import TakeQuiz from "./Courses/Quizzes/TakeQuiz";
-
+import ProjectInfo from "./Account/ProjectInfo";
 
 export default function Kambaz() {
   const [courses, setCourses] = useState<any[]>([]);
@@ -127,6 +127,10 @@ export default function Kambaz() {
             <Route path="Courses/:cid/Quizzes/:qid/preview" element={<QuizPreview />} />
             <Route path="Courses/:cid/Quizzes/:qid/take" element={<TakeQuiz />} />
             <Route path="*" element={<Navigate to="Account/Signin" replace />} />
+            <Route path="/" element={<Navigate to="Dashboard" />} />
+            <Route path="Account/*" element={<Account />} />
+            <Route path="Account/ProjectInfo" element={<ProjectInfo />} />  {/* ✅ 新增 */}
+  
 
 
           </Routes>
