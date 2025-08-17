@@ -1,115 +1,81 @@
+// src/Kambaz/Account/client.ts
 import axios from "axios";
-const axiosWithCredentials = axios.create({ withCredentials: true });
-export const REMOTE_SERVER = import.meta.env.VITE_REMOTE_SERVER;
-export const USERS_API = `${REMOTE_SERVER}/api/users`;
-export const findAllUsers = async () => {
-  const response = await axiosWithCredentials.get(USERS_API);
-  return response.data;
-};
 
-export const signin = async (credentials: any) => {
-  const response = await axiosWithCredentials.post( `${USERS_API}/signin`, credentials );
-  return response.data;
-};
-
-export const signup = async (user: any) => {
-  const response = await axiosWithCredentials.post(`${USERS_API}/signup`, user);
-  return response.data;
-};
-
-export const updateUser = async (user: any) => {
-  const response = await axiosWithCredentials.put(`${USERS_API}/${user._id}`, user);
-  return response.data;
-};
-
-
-export const profile = async () => {
-  const response = await axiosWithCredentials.post(`${USERS_API}/profile`);
-  return response.data;
-};
-
-export const signout = async () => {
-  const response = await axiosWithCredentials.post(`${USERS_API}/signout`);
-  return response.data;
-};
-
-export const findMyCourses = async () => {
-  const { data } = await axiosWithCredentials.get(`${USERS_API}/current/courses`);
-  return data;
-};
-
-export const createCourse = async (course: any) => {
-  const { data } = await axiosWithCredentials.post(`${USERS_API}/current/courses`, course);
-  return data;
-};
-
-// src/.../client.ts
-export const findUsersByRole = async (role: string) => {
-  const { data } = await axiosWithCredentials.get(`${USERS_API}?role=${encodeURIComponent(role)}`);
-  return data;
-};
-
-export const findUsersByPartialName = async (name: string) => {
-  const response = await axios.get(`${USERS_API}?name=${name}`);
-  return response.data;
-};
-
-export const findUserById = async (id: string) => {
-  const response = await axios.get(`${USERS_API}/${id}`);
-  return response.data;
-};
-
-export const deleteUser = async (userId: string) => {
-  const response = await axios.delete( `${USERS_API}/${userId}` );
-  return response.data;
-};
-
-export const createUser = async (user: any) => {
-  const response = await axios.post(`${USERS_API}`, user);
-  return response.data;
-};
-
-export const findCoursesForUser = async (userId: string) => {
-const response = await axiosWithCredentials.get(`${USERS_API}/${userId}/courses`);
-return response.data;
-};
-
-export const enrollIntoCourse = async (userId: string, courseId: string) => {
-const response = await axiosWithCredentials.post(`${USERS_API}/${userId}/courses/${courseId}`);
-return response.data;
-};
-export const unenrollFromCourse = async (userId: string, courseId: string) => {
-const response = await axiosWithCredentials.delete(`${USERS_API}/${userId}/courses/${courseId}`);
-return response.data;
-};
-
-export const findUsersForCourse = async (courseId: string) => {
-  const { data } = await axiosWithCredentials.get(
-    `${REMOTE_SERVER}/api/courses/${courseId}/users`
+// 统一后端基地址（部署时在 Netlify 环境变量里设置）
+const BASE_URL = import.meta.env.VITE_REMOTE_SERVER;
+if (!BASE_URL) {
+  console.error(
+    "[client] VITE_REMOTE_SERVER is missing. Example: https://kambaz-node-server-app-ufbd.onrender.com"
   );
-  return data;
-};
+}
 
-export const ENROLLMENTS_API = `${REMOTE_SERVER}/api/enrollments`;
+// 统一的 axios 实例：基地址 + 携带凭证（cookie）
+export const api = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
 
-export const enroll = async (userId: string, courseId: string) => {
-  const { data } = await axiosWithCredentials.post(ENROLLMENTS_API, {
-    user: userId,
-    course: courseId,
-  });
-  return data; // -> enrollment 文档
-};
+// ========== Users ==========
+const USERS_API = "/api/users";
 
-/** 退课 */
-export const unenroll = async (userId: string, courseId: string) => {
-  const { data } = await axiosWithCredentials.delete(
-    `${ENROLLMENTS_API}/${userId}/${courseId}`
-  );
-  return data; // -> { deletedCount: n }
-};
+export const findAllUsers = async () => (await api.get(USERS_API)).data;
 
-export const createCourseForCurrentUser = async (course: any) => {
-  // 你的后端在 POST /api/courses 时会把 currentUser 自动加入该课
-  const { data } = await axiosWithCredentials.post(`${REMOTE_SERVER}/api/courses`, course);
-  return data;
-};
+export const signin = async (credentials: { username: string; password: string }) =>
+  (await api.post(`${USERS_API}/signin`, credentials)).data;
+
+export const signup = async (user: any) =>
+  (await api.post(`${USERS_API}/signup`, user)).data;
+
+export const updateUser = async (user: any) =>
+  (await api.put(`${USERS_API}/${user._id}`, user)).data;
+
+// 建议 GET，减少预检
+export const profile = async () => (await api.get(`${USERS_API}/profile`)).data;
+
+export const signout = async () => (await api.post(`${USERS_API}/signout`)).data;
+
+export const findMyCourses = async () =>
+  (await api.get(`${USERS_API}/current/courses`)).data;
+
+export const createCourse = async (course: any) =>
+  (await api.post(`${USERS_API}/current/courses`, course)).data;
+
+export const findUsersByRole = async (role: string) =>
+  (await api.get(`${USERS_API}`, { params: { role } })).data;
+
+export const findUsersByPartialName = async (name: string) =>
+  (await api.get(`${USERS_API}`, { params: { name } })).data;
+
+export const findUserById = async (id: string) =>
+  (await api.get(`${USERS_API}/${id}`)).data;
+
+export const deleteUser = async (userId: string) =>
+  (await api.delete(`${USERS_API}/${userId}`)).data;
+
+export const createUser = async (user: any) =>
+  (await api.post(`${USERS_API}`, user)).data;
+
+export const findCoursesForUser = async (userId: string) =>
+  (await api.get(`${USERS_API}/${userId}/courses`)).data;
+
+export const enrollIntoCourse = async (userId: string, courseId: string) =>
+  (await api.post(`${USERS_API}/${userId}/courses/${courseId}`)).data;
+
+export const unenrollFromCourse = async (userId: string, courseId: string) =>
+  (await api.delete(`${USERS_API}/${userId}/courses/${courseId}`)).data;
+
+// ========== Enrollments ==========
+const ENROLLMENTS_API = "/api/enrollments";
+
+export const enroll = async (userId: string, courseId: string) =>
+  (await api.post(ENROLLMENTS_API, { user: userId, course: courseId })).data;
+
+export const unenroll = async (userId: string, courseId: string) =>
+  (await api.delete(`${ENROLLMENTS_API}/${userId}/${courseId}`)).data;
+
+// ========== Courses（如果你这边也要直连课程端点）==========
+export const createCourseForCurrentUser = async (course: any) =>
+  (await api.post(`/api/courses`, course)).data;
+
+export const findUsersForCourse = async (courseId: string) =>
+  (await api.get(`/api/courses/${courseId}/users`)).data;
