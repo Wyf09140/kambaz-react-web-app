@@ -26,6 +26,15 @@ export default function ProjectInfo() {
         >
           github.com/Wyf09140/kambaz-node-server-app
         </a>
+        <br />
+        <strong>Project Demo Video:</strong>{" "}
+        <a
+          href="https://youtu.be/qokooek0xtA"
+          target="_blank"
+          rel="noreferrer"
+        >
+          https://youtu.be/qokooek0xtA
+        </a>
       </p>
     </div>
   );
