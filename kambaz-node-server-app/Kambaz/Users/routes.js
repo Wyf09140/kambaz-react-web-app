@@ -148,13 +148,15 @@ export default function UserRoutes(app) {
     req.session.destroy(() => res.sendStatus(200));
   };
   app.post("/api/users/signout", signout);
-
-  const profile = (req, res) => {
-    const me = req.session.currentUser;
-    if (!me) return res.sendStatus(401);
-    res.json(me);
-  };
-  app.post("/api/users/profile", profile);
+  
+// 放在 Users/routes.js 里，和原来的 profile 一起
+const profile = (req, res) => {
+  const me = req.session?.currentUser;
+  if (!me) return res.sendStatus(401);
+  res.json(me);
+};
+app.post("/api/users/profile", profile);
+app.get("/api/users/profile", profile);   // ← 新增
 
   /** ---------- Courses 与 Enrollments 相关（保持原逻辑） ---------- */
   const findCoursesForEnrolledUser = (req, res) => {
